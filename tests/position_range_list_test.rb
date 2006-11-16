@@ -61,6 +61,29 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal 0, PositionRange::List.new.range_size
   end
 
+  def test_within
+    assert PositionRange::List.from_s('1,3:5,6').within?(
+        PositionRange::List.from_s('0,8'))
+    assert PositionRange::List.from_s('1,3:5,6').within?(
+        PositionRange::List.from_s('1,6'))
+    assert PositionRange::List.from_s('5,6:1,3').within?(
+        PositionRange::List.from_s('1,6'))
+
+    assert_equal false,
+        PositionRange::List.from_s('5,7:1,3').within?(
+            PositionRange::List.from_s('1,6'))
+    assert_equal false,
+        PositionRange::List.from_s('0,408:500,520').within?(
+            PositionRange::List.from_s('0,519'))
+  end
+
+  def test_below
+    assert PositionRange::List.from_s('1,3:5,6').below?(7)
+    assert PositionRange::List.from_s('0,408:500,520').below?(521)
+    assert_equal false,
+        PositionRange::List.from_s('0,408:500,520').below?(520)
+  end
+
   # Lowlevel methods
 
   def test_merging_adjacents
@@ -210,6 +233,44 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.new.translate!(5)
   end
 
+  def test_insert_at_ranges
+    # Without skipping
+    assert_equal PositionRange::List.from_s('0,10:50,59:15,20'),
+        PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
+            PositionRange::List.from_s('50,59'),
+            PositionRange::List.from_s('11,20'))
+
+    # With skipping
+    assert_equal PositionRange::List.from_s('39,48:100,102:6,7:16,20'),
+        PositionRange::List.from_s('39,48:16,20').insert_at_ranges!(
+            PositionRange::List.from_s('100,102:6,7'),
+            PositionRange::List.from_s('10,12:19,20'),
+            PositionRange::List.from_s('13,18'))
+
+    # With multiple elements in one range to insert at
+    assert_equal PositionRange::List.from_s('0,10:35,36:33,34:15,20'),
+        PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
+            PositionRange::List.from_s('35,36:33,34'),
+            PositionRange::List.from_s('11,14'))
+
+    # With cutting
+    assert_equal PositionRange::List.from_s('0,7:50,63:8,10:15,20'),
+        PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
+            PositionRange::List.from_s('50,63'),
+            PositionRange::List.from_s('8,21'))
+
+    assert_equal PositionRange::List.from_s('0,100:430,480:101,408:500,519'),
+        PositionRange::List.from_s('0,408:500,519').insert_at_ranges!(
+            PositionRange::List.from_s('430,480'),
+            PositionRange::List.from_s('159,209'),
+            PositionRange::List.from_s('101,158'))
+  end
+
+  def test_stack_adjacent
+    assert_equal PositionRange::List.from_s('0,3:4,23'),
+        PositionRange::List.from_s('50,53:11,30').stack_adjacent
+  end
+
   # Highlevel methods
 
   def test_translate_to_view
@@ -257,32 +318,6 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('5,8'))
   end
 
-  def test_insert_at_ranges
-    # Without skipping
-    assert_equal PositionRange::List.from_s('0,10:50,63:15,20'),
-        PositionRange::List.from_s('0,10:15,20').insert_at_ranges(
-            PositionRange::List.from_s('50,63'),
-            PositionRange::List.from_s('11,20'))
-
-    # With skipping
-    assert_equal PositionRange::List.from_s('39,48:100,102:6,7:16,20'),
-        PositionRange::List.from_s('39,48:16,20').insert_at_ranges(
-            PositionRange::List.from_s('100,102:6,7'),
-            PositionRange::List.from_s('10,12:19,20'),
-            PositionRange::List.from_s('13,18'))
-
-    # With multiple elements in one range to insert at
-    assert_equal PositionRange::List.from_s('0,10:35,36:33,34:15,20'),
-        PositionRange::List.from_s('0,10:15,20').insert_at_ranges(
-            PositionRange::List.from_s('35,36:33,34'),
-            PositionRange::List.from_s('11,14'))
-  end
-
-  def test_stack_adjacent
-    assert_equal PositionRange::List.from_s('0,3:4,23'),
-        PositionRange::List.from_s('50,53:11,30').stack_adjacent
-  end
-
   def test_cluster_overlaps
     p = PositionRange::List.from_s('1,2:1,2:10,18:14,18:20,23')
     output = [
@@ -301,6 +336,9 @@ class PositionRangeListTest < Test::Unit::TestCase
   def test_apply_to_string
     p = PositionRange::List.from_s('4,6:8,8:0,2')
     assert_equal '5679123', p.apply_to_string('123456789')
+
+    p = PositionRange::List.from_s('0,408:500,520')
+    assert_equal 'a' * p.range_size, p.apply_to_string('a' * 521)
 
     # empty
     assert_equal '', PositionRange::List.new.apply_to_string('12345')

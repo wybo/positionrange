@@ -70,6 +70,8 @@ class PositionRange::List < Array
 
   ### Low level methods
 
+  # Checking, ranges, etc
+
   # Returns the combined size of the ranges in this list.
   #
   def range_size
@@ -79,6 +81,27 @@ class PositionRange::List < Array
     }
     return range_size
   end
+
+  # Returns true if all PositionRanges in this list don't refer to
+  # positions bigger than size. Otherwise false.
+  #
+  def below?(size)
+    return self.within?(
+        PositionRange::List.new([PositionRange.new(0,size - 1)]))
+  end
+
+  # Returns true if all PositionRanges in this list fall within the
+  # PositionRanges in the given other PositionRange::List
+  #
+  def within?(other)
+    if (self - other).empty?
+      return true
+    else
+      return false
+    end
+  end
+
+  # Operations
 
   # Applies an intersection in the sense of Set theory.
   #
@@ -290,6 +313,57 @@ class PositionRange::List < Array
     return self
   end
 
+  # The ranges_to_insert are inserted at the ranges_at_which_to_insert 
+  # of this list, counted in range_size from it's beginning, and inter-
+  # luded with ranges_to_skip.
+  #
+  # So PositionRange::List.from_s('39,48:16,20').insert_at_ranges!(
+  #     PositionRange::List.from_s('100,102:6,7'),
+  #     PositionRange::List.from_s('10,12:19,20'),
+  #     PositionRange::List.from_s('13,18'))
+  #
+  # will result in:
+  # PositionRange::List.from_s('39,48:100,102:6,7:16,20')
+  #
+  def insert_at_ranges!(ranges_to_insert, ranges_at_which_to_insert, 
+      ranges_to_skip = [])
+    if ranges_to_insert.range_size != ranges_at_which_to_insert.range_size
+      raise StandardError, 'Ranges to insert, and at which to insert are ' +
+          'of different range_sizes: ' + ranges_to_insert.to_s + ', ' +
+          ranges_at_which_to_insert.to_s
+    end
+    ranges_to_act = ranges_at_which_to_insert.each {|p_r| p_r.link = :ins}.concat(
+        ranges_to_skip).sort!
+
+    self_i = -1
+    self_p = 0
+    ins_p = 0
+    ranges_to_act.each {|p_r|
+      while self_p < p_r.begin - 1
+        self_i += 1
+        self_p += self[self_i].size
+      end
+      if self_p > p_r.begin
+        copy = self[self_i]
+        cut = copy.end + p_r.begin - self_p
+        self[self_i] = copy.new_dup(copy.begin, cut)
+        self.insert(self_i + 1, copy.new_dup(cut + 1, copy.end))
+        self_p = cut
+      end
+      if p_r.link == :ins
+        inner_p = 0
+        while inner_p < p_r.size
+          self.insert(self_i + 1, ranges_to_insert[ins_p])
+          inner_p += ranges_to_insert[ins_p].size
+          self_i += 1
+          ins_p += 1
+        end
+      end
+      self_p += p_r.size
+    }
+    return self
+  end
+
   ### Highlevel methods
   
   # Translates the PositionRange::List into the relative space defined
@@ -322,73 +396,6 @@ class PositionRange::List < Array
     }
     absolute.merge_adjacents!
     return absolute
-  end
-
-  # Creates a new PositionRange::List in which the ranges_to_insert
-  # are inserted at the ranges_at_which_to_insert of this list,
-  # counted in range_size from it's beginning, and inter-luded with
-  # ranges_to_skip.
-  #
-  # So PositionRange::List.from_s('39,48:16,20').insert_at_ranges(
-  #     PositionRange::List.from_s('100,102:6,7'),
-  #     PositionRange::List.from_s('10,12:19,20'),
-  #     PositionRange::List.from_s('13,18'))
-  #
-  # will result in:
-  # PositionRange::List.from_s('39,48:100,102:6,7:16,20')
-  #
-  # NOTE: The ranges_at_which_to_insert are assumed not to be cutting
-  # in halve ranges already in this list, nor should the
-  # ranges_to_insert be longer than the spaces in which they fit.
-  #
-  # So PositionRange::List.from_s('0,10:15,20').insert_at_ranges(
-  #     PositionRange::List.from_s('50,63'),
-  #     PositionRange::List.from_s('11,20'))
-  #
-  # is ok, and will result in:
-  # PositionRange::List.from_s('0,10:50,63:15,20')
-  #
-  # While PositionRange::List.from_s('0,10:15,20').insert_at_ranges(
-  #     PositionRange::List.from_s('50,63'),
-  #     PositionRange::List.from_s('8,14'))
-  #
-  # is wrong for 8,14's cutting up of 0,10
-  #
-  # NOTE: ranges_at_which_to_insert and ranges_to_skip must be sorted.
-  #
-  def insert_at_ranges(ranges_to_insert, ranges_at_which_to_insert, 
-      ranges_to_skip = nil)
-    temp_ranges_to_insert = ranges_to_insert.dup
-    temp_ranges_at_which_to_insert = ranges_at_which_to_insert.dup
-    temp_ranges_to_skip = (ranges_to_skip ? ranges_to_skip.dup : nil)
-    including = PositionRange::List.new
-    including_p = 0
-    i = 0
-    while true
-      if !temp_ranges_at_which_to_insert.empty? and 
-          including_p == temp_ranges_at_which_to_insert.first.first
-        # insert, get local i_p, and move global one to end of shifted insert
-        in_insert_i_p = including_p
-        including_p += temp_ranges_at_which_to_insert.shift.size
-        while in_insert_i_p < including_p
-          # insert all ranges untill the size is made full
-          including.push(temp_ranges_to_insert.shift)
-          in_insert_i_p += including.last.size
-        end
-      elsif temp_ranges_to_skip and !temp_ranges_to_skip.empty? and 
-          including_p == temp_ranges_to_skip.first.first
-        # just skip
-        including_p += temp_ranges_to_skip.shift.size
-      elsif i < self.size
-        # add range already in the arr and move including_p
-        including.push(self[i])
-        i += 1
-        including_p += including.last.size
-      else
-        break
-      end
-    end
-    return including
   end
 
   # Stacks the PositionRanges in the List adjacent in a new
