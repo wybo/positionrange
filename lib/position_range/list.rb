@@ -170,7 +170,7 @@ class PositionRange::List < Array
 
   # Deletes the position_range that is specified.
   #
-  def delete!(p_r)
+  def delete(p_r)
     self.substract!(PositionRange::List.new([p_r]))
   end
 

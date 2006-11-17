@@ -190,6 +190,11 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.new([p2]),:ignore_attributes)
   end
 
+  def test_delete
+    assert_equal PositionRange::List.from_s('1,2:7,8'),
+        PositionRange::List.from_s('1,5:4,8').delete(PositionRange.new(3,6))
+  end
+
   def test_intersect
     assert_equal PositionRange::List.from_s('3,5:8,11'),
         PositionRange::List.from_s('1,5:8,17') &
