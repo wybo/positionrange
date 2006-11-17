@@ -27,7 +27,7 @@ class PositionRangeTest < Test::Unit::TestCase
     assert_equal '1,3', PositionRange.new(1,3).to_s
   end
 
-  def test_exceptions
+  def test_exceptions_at_creation_time
     assert_raise(StandardError) {
       PositionRange.from_s('4,,2')
     }
@@ -39,6 +39,38 @@ class PositionRangeTest < Test::Unit::TestCase
     assert_raise(PositionRange::Error) {
       PositionRange.new(-1,3)
     }
+  end
+
+  def test_define_attribute
+    p = PositionRange.new(1,2)
+    p.define_attribute('kk')
+    assert p.respond_to?('kk')
+    assert_equal ['kk'], p.attributes
+    p.kk = 3
+    assert_equal 3, p.kk
+    p.lll = 5
+    assert_equal ['kk','lll'], p.attributes
+    p2 = PositionRange.new(1,2)
+    assert_equal ['kk','lll'], p2.attributes
+  end
+
+  def test_dynamic_attributes
+    p = PositionRange.new(1,3,:blah => 2)
+    assert_equal 2, p.blah
+    k = PositionRange.new(2,44,:blah => 7)
+    assert_equal 7, k.blah
+    assert_equal 2, p.blah
+  end
+
+  def test_new_dup
+    p = PositionRange.new(1,3)
+    p.authorship = 'a'
+    p.link = 34
+
+    pd = p.new_dup(4,6)
+
+    assert_equal p.authorship, pd.authorship
+    assert_equal p.link, pd.link
   end
 
   def test_size
@@ -70,16 +102,5 @@ class PositionRangeTest < Test::Unit::TestCase
     assert p1.has_equal_pointer_attributes?(p2)
     p2.link = 'ac'
     assert !p1.has_equal_pointer_attributes?(p2)
-  end
-
-  def test_new_dup
-    p = PositionRange.new(1,3)
-    p.authorship = 'a'
-    p.link = 34
-
-    pd = p.new_dup(4,6)
-
-    assert_equal p.authorship, pd.authorship
-    assert_equal p.link, pd.link
   end
 end

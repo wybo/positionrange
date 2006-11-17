@@ -113,7 +113,7 @@ class PositionRange::List < Array
   # 
   def &(other)
     substraction_list = other.dup.invert!
-    return self - substraction_list
+    return self.dup.substract!(substraction_list,:ignore_attributes)
   end
 
   # Applies a substraction in the sense of Set theory.
@@ -132,56 +132,38 @@ class PositionRange::List < Array
   # So for example:
   # 1,5:7,8:10,11' becomes '1,3:7,7:10,11' after substracting '4,6:8,9'
   #
-  def substract!(other)
+  # Only substracts PositionRanges if all their attributes (except for first and 
+  # last) are the same, unless ignore_attributes is specified.
+  #
+  # NOTE: Self will be sorted.
+  #
+  def substract!(other,ignore_attributes = false)
     self.sort!
-    if other.size > 0
-      other.dup.merge_adjacents!
-      start_self_p = 0
-      # walk the other
-      other.each {|substract_p_r|
-        self_p = start_self_p
-        # walk self untill overlap
-        while self[self_p] and 
-            self[self_p].last < substract_p_r.first
-          self_p += 1
+    if self.size > 0 and other.size > 0
+      other = other.dup.merge_adjacents!
+
+      i = 0
+      other.each do |p_r|
+        while self[i] and self[i].end < p_r.begin
+          i += 1
         end
-        if !self[self_p]
-          # done for substract_p_r if at last item
-          break
-        end
-        # for the next substract_p_r we start here again
-        start_self_p = self_p
-        # now while there is overlap
-        while self[self_p] and 
-            self[self_p].last >= substract_p_r.first and 
-            self[self_p].first <= substract_p_r.last
-          self_p_jump = 0
-          # take a copy for the case of overlap on both sides
-          examined_p_r = self[self_p]
-          if examined_p_r.first < substract_p_r.first
-            # overlap at the end
-            self[self_p] = examined_p_r.new_dup(
-                examined_p_r.first,substract_p_r.first - 1)
-            self_p_jump = 1
-          end
-          if examined_p_r.last > substract_p_r.last
-            # overlap at the beginning
-            new_p_r = examined_p_r.new_dup(substract_p_r.last + 1,examined_p_r.last)
-            if self_p_jump == 1
-              self.insert(self_p + 1,new_p_r)
+        while self[i] and self[i].begin <= p_r.end
+          if ignore_attributes or self[i].has_equal_pointer_attributes?(p_r)
+            if self[i].begin < p_r.begin
+              copy = self[i].dup
+              self[i] = copy.new_dup(copy.begin, p_r.begin - 1)
+              self.insert(i + 1, copy.new_dup(p_r.begin, copy.end))
+              i += 1
+            elsif self[i].end <= p_r.end
+              self.delete_at(i)
             else
-              self[self_p] = new_p_r
+              self[i] = self[i].new_dup(p_r.end + 1, self[i].end)
             end
-            self_p_jump += 1
-          end
-          if self_p_jump == 0
-            # total overlap
-            self.delete_at(self_p)
           else
-            self_p += self_p_jump
+            i += 1
           end
         end
-      }
+      end
     end
     return self
   end
@@ -284,13 +266,13 @@ class PositionRange::List < Array
   # Only merges adjacent PositionRanges if all their attributes
   # (except for first and last) are the same
   #
-  def merge_adjacents!
+  def merge_adjacents!(ignore_attributes = false)
     self.sort!
     if self.size > 1
       i = 0
       while i < self.size
         if self[i - 1].end + 1 == self[i].begin and 
-            self[i - 1].has_equal_pointer_attributes?(self[i])
+            (ignore_attributes or self[i - 1].has_equal_pointer_attributes?(self[i]))
           self[i - 1] = self[i - 1].new_dup(self[i - 1].begin, self[i].end)
           self.delete_at(i)
         else
@@ -332,30 +314,30 @@ class PositionRange::List < Array
           'of different range_sizes: ' + ranges_to_insert.to_s + ', ' +
           ranges_at_which_to_insert.to_s
     end
-    ranges_to_act = ranges_at_which_to_insert.each {|p_r| p_r.link = :ins}.concat(
+    ranges_to_act = ranges_at_which_to_insert.each {|p_r| p_r.action = :ins}.concat(
         ranges_to_skip).sort!
 
-    self_i = -1
+    i = -1
     self_p = 0
     ins_p = 0
     ranges_to_act.each {|p_r|
       while self_p < p_r.begin - 1
-        self_i += 1
-        self_p += self[self_i].size
+        i += 1
+        self_p += self[i].size
       end
       if self_p > p_r.begin
-        copy = self[self_i]
+        copy = self[i]
         cut = copy.end + p_r.begin - self_p
-        self[self_i] = copy.new_dup(copy.begin, cut)
-        self.insert(self_i + 1, copy.new_dup(cut + 1, copy.end))
+        self[i] = copy.new_dup(copy.begin, cut)
+        self.insert(i + 1, copy.new_dup(cut + 1, copy.end))
         self_p = cut
       end
-      if p_r.link == :ins
+      if p_r.action == :ins
         inner_p = 0
         while inner_p < p_r.size
-          self.insert(self_i + 1, ranges_to_insert[ins_p])
+          self.insert(i + 1, ranges_to_insert[ins_p])
           inner_p += ranges_to_insert[ins_p].size
-          self_i += 1
+          i += 1
           ins_p += 1
         end
       end

@@ -30,6 +30,13 @@
 
 class PositionRange < Range
   include Comparable
+
+  @@attributes = []
+
+  def attributes
+    return @@attributes
+  end
+
   ### Constants
 
   # Mainly used by PositionRange::List
@@ -48,8 +55,6 @@ require 'position_range/error'
 require 'position_range/list'
 
 class PositionRange
-  attr_accessor :authorship, :link
-
   ### Constructors
 
   # Initializes a new PositionRange. 
@@ -58,8 +63,8 @@ class PositionRange
   # end-position from the range.
   #
   # Options:
-  # * <tt>:authorship</tt> - Authorship to associate with this position range
-  # * <tt>:link</tt> - Link to associate with this range
+  # * <tt>:<any attribute you need></tt> - Usefull for associating Links and 
+  #     Authorships with this range.
   #
   # NOTE: The associations set in this way are not 2-way like in Rails
   #
@@ -75,8 +80,12 @@ class PositionRange
           ' larger than the MaximumSize'
     end
 
-    @authorship = options[:authorship]
-    @link = options[:link]
+    options.each_key do |attribute|
+      if !self.respond_to?(attribute)
+        self.define_attribute(attribute.to_s)
+      end
+      self.send(attribute.to_s + '=', options[attribute])
+    end
 
     super(first, last)
   end
@@ -116,7 +125,11 @@ class PositionRange
   # the begin and end positions of the new PositionRange.
   #
   def new_dup(first, last)
-    PositionRange.new(first, last, :authorship => @authorship, :link => @link)
+    attributes_hash = Hash.new
+    self.attributes.each {|attribute|
+      attributes_hash[attribute.to_sym] = self.send(attribute)
+    }
+    PositionRange.new(first, last, attributes_hash)
   end
 
   # Comparison
@@ -155,17 +168,40 @@ class PositionRange
   # Returns true if the pointer_attributes (link and authorship) are equal
   #
   def has_equal_pointer_attributes?(other_position_range)
-    if self.link == other_position_range.link and
-        self.authorship == other_position_range.authorship
-      return true
-    else
-      return false
-    end
+    self.attributes.each {|attribute|
+      if self.send(attribute) != other_position_range.send(attribute)
+        return false
+      end
+    }
+    return true
   end
 
   # Turns a PositionRange into a string
   #
   def to_s
     return self.begin.to_s + ',' + self.end.to_s
+  end
+
+  def method_missing(method_id, *arguments)
+    if method_id.to_s[-1..-1] == '='
+      attribute = method_id.to_s.slice!(0...-1)
+      self.define_attribute(attribute)
+      self.send(method_id.to_s, *arguments)
+    elsif arguments.empty?
+      return nil
+    else
+      super(method_id, *arguments)
+    end
+  end
+
+  # Defines the given string as an attribute
+  #
+  # (attr_accessor)
+  #
+  def define_attribute(attribute)
+    PositionRange.class_eval {
+      attr_accessor attribute
+    }
+    @@attributes.push(attribute)
   end
 end

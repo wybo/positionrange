@@ -86,7 +86,7 @@ class PositionRangeListTest < Test::Unit::TestCase
 
   # Lowlevel methods
 
-  def test_merging_adjacents
+  def test_merge_adjacents
     # same pointer attributes
     assert_equal PositionRange::List.from_s('2,8'),
         PositionRange::List.from_s('2,4:5,8').merge_adjacents!
@@ -101,11 +101,13 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('1,1:2,2:3,3').merge_adjacents!
 
     # different pointer attributes
+    p1 = PositionRange.new(2,4,:link => :a)
+    p2 = PositionRange.new(5,8,:link => :b)
     assert_equal PositionRange::List.from_s('2,4:5,8'),
-        PositionRange::List.new([
-            PositionRange.new(2,4,:link => :a),
-            PositionRange.new(5,8,:link => :b)
-          ])
+        PositionRange::List.new([p1,p2]).merge_adjacents!
+
+    assert_equal PositionRange::List.from_s('2,8'),
+        PositionRange::List.new([p1,p2]).merge_adjacents!(:ignore_attributes)
 
     # empty
     assert_equal PositionRange::List.new,
@@ -138,7 +140,6 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.new,
         PositionRange::List.from_s('2,7') - 
             PositionRange::List.from_s('1,8')
-
     assert_equal PositionRange::List.from_s('3,5:8,11'),
         PositionRange::List.from_s('1,15') - 
             PositionRange::List.from_s('1,2:6,7:12,20')
@@ -158,7 +159,15 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.from_s('10,13'),
         PositionRange::List.from_s('3,5:10,16') -
             PositionRange::List.from_s('0,9:14,200000')
-  
+
+    assert_equal PositionRange::List.from_s('3,5:10,16'),
+        PositionRange::List.from_s('3,5:10,16') -
+            PositionRange::List.from_s('21,2147483647')
+
+    assert_equal PositionRange::List.from_s('3,5'),
+        PositionRange::List.from_s('3,5:10,16') -
+            PositionRange::List.from_s('6,2147483647')
+
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.from_s('2,5') -
@@ -169,6 +178,16 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.new,
         PositionRange::List.new -
             PositionRange::List.new
+
+    # attributes
+    p1 = PositionRange.new(1,5,:attr => 1)
+    p2 = PositionRange.new(1,5,:attr => 2)
+    assert_equal PositionRange::List.new([p1]),
+        PositionRange::List.new([p1]) - PositionRange::List.new([p2])
+
+    assert_equal PositionRange::List.new(),
+        PositionRange::List.new([p1]).substract!(
+            PositionRange::List.new([p2]),:ignore_attributes)
   end
 
   def test_intersect
@@ -179,6 +198,10 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.from_s('10,13'),
         PositionRange::List.from_s('3,5:10,16') &
             PositionRange::List.from_s('10,13')
+
+    assert_equal PositionRange::List.from_s('4,11:13,21:22,29:35,42:62,68:342,349:357,360'),
+        PositionRange::List.from_s('4,11:13,21:22,29:35,42:62,68:342,349:357,360:410,420') &
+            PositionRange::List.from_s('0,408')
 
     # empty
     assert_equal PositionRange::List.new,
