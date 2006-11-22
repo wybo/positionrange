@@ -77,6 +77,40 @@ class PositionRangeTest < Test::Unit::TestCase
     assert_equal 4, PositionRange.new(1,4).size
   end
 
+  def test_substraction
+    p1 = PositionRange.new(11,20)
+    p2 = PositionRange.new(16,25)
+    assert_equal PositionRange.new(11,15), p1 - p2
+
+    p3 = PositionRange.new(10,11)
+    assert_equal PositionRange.new(12,20), p1 - p3
+
+    p4 = PositionRange.new(20,21)
+    assert_equal PositionRange.new(11,19), p1 - p4
+
+    p5 = p1.dup
+    assert_equal nil, p1 - p5
+
+    p6 = PositionRange.new(30,80)
+    assert_equal p1, p1 - p6
+
+    p7 = PositionRange.new(2,4)
+    p8 = PositionRange.new(3,4)
+    assert_equal PositionRange.new(2,2), p7 - p8
+  end
+
+  def test_eq_eq_eq
+    p1 = PositionRange.new(1,5)
+    p2 = PositionRange.new(4,10)
+    assert p1 === p2
+
+    p3 = PositionRange.new(2,3)
+    assert p1 === p3
+
+    p4 = PositionRange.new(15,90)
+    assert !(p1 === p4)
+  end
+
   def test_comparison
     p1 = PositionRange.new(1,3)
     p2 = PositionRange.new(2,3)

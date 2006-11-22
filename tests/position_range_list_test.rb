@@ -61,6 +61,13 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal 0, PositionRange::List.new.range_size
   end
 
+  def test_below
+    assert PositionRange::List.from_s('1,3:5,6').below?(7)
+    assert PositionRange::List.from_s('0,408:500,520').below?(521)
+    assert_equal false,
+        PositionRange::List.from_s('0,408:500,520').below?(520)
+  end
+
   def test_within
     assert PositionRange::List.from_s('1,3:5,6').within?(
         PositionRange::List.from_s('0,8'))
@@ -77,11 +84,19 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('0,519'))
   end
 
-  def test_below
-    assert PositionRange::List.from_s('1,3:5,6').below?(7)
-    assert PositionRange::List.from_s('0,408:500,520').below?(521)
-    assert_equal false,
-        PositionRange::List.from_s('0,408:500,520').below?(520)
+  def test_index
+    p = PositionRange::List.from_s('1,5:7,9')
+    assert_equal 0, p.index(PositionRange.new(1,5))
+    assert_equal 1, p.index(PositionRange.new(7,9))
+
+    assert_equal nil, p.index(PositionRange.new(7,9,:attrobo => 1),
+        :dont_ignore_attributes => true)
+
+    p = PositionRange::List.new([PositionRange.new(1,5,:attrobo => 1),
+        PositionRange.new(1,5,:attrobo => 2)])
+    assert_equal 0, p.index(PositionRange.new(1,5,:attrobo => 2))
+    assert_equal 1, p.index(PositionRange.new(1,5,:attrobo => 2),
+        :dont_ignore_attributes => true)
   end
 
   # Lowlevel methods
@@ -94,7 +109,7 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.from_s('2,4:6,13'),
         PositionRange::List.from_s('2,4:6,9:10,13').merge_adjacents!
 
-    assert_equal PositionRange::List.from_s('2,4:6,13'),
+    assert_equal PositionRange::List.from_s('6,9:2,4:10,13'),
         PositionRange::List.from_s('6,9:2,4:10,13').merge_adjacents!
 
     assert_equal PositionRange::List.from_s('1,3'),
@@ -107,7 +122,7 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.new([p1,p2]).merge_adjacents!
 
     assert_equal PositionRange::List.from_s('2,8'),
-        PositionRange::List.new([p1,p2]).merge_adjacents!(:ignore_attributes)
+        PositionRange::List.new([p1,p2]).merge_adjacents!(:ignore_attributes => true)
 
     # empty
     assert_equal PositionRange::List.new,
@@ -140,6 +155,7 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.new,
         PositionRange::List.from_s('2,7') - 
             PositionRange::List.from_s('1,8')
+
     assert_equal PositionRange::List.from_s('3,5:8,11'),
         PositionRange::List.from_s('1,15') - 
             PositionRange::List.from_s('1,2:6,7:12,20')
@@ -187,7 +203,7 @@ class PositionRangeListTest < Test::Unit::TestCase
 
     assert_equal PositionRange::List.new(),
         PositionRange::List.new([p1]).substract!(
-            PositionRange::List.new([p2]),:ignore_attributes)
+            PositionRange::List.new([p2]),:ignore_attributes => true)
   end
 
   def test_delete
@@ -337,8 +353,13 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.from_s('3,5:35,38:50,52'),
       p.translate_from_view(PositionRange::List.from_s('0,5:31,38:50,90'))
     # last before the first
-    assert_equal PositionRange::List.from_s('2,8:203,205'),
+    assert_equal PositionRange::List.from_s('203,205:2,8'),
       p.translate_from_view(PositionRange::List.from_s('200,207:0,30'))
+
+    # swapped
+    p = PositionRange::List.from_s('5,6:1,2')
+    assert_equal PositionRange::List.from_s('6,7:2,3'),
+      p.translate_from_view(PositionRange::List.from_s('1,8'))
 
     # empty
     assert_equal PositionRange::List.new,

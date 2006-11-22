@@ -132,6 +132,42 @@ class PositionRange
     PositionRange.new(first, last, attributes_hash)
   end
 
+  # Returns this PositionRange substracted by the previous
+  #
+  # NOTE: The substracted PositionRange must overlap with at least
+  # one side of this one. If it's begin-position is bigger than this 
+  # one's and it's end position smaller than this one's, no 
+  # meaningfull output is guaranteed.
+  #
+  def -(other)
+    if other.begin > self.end or other.end < self.begin
+      return self
+    elsif other.begin <= self.begin and other.end >= self.end
+      return nil
+    elsif other.end < self.end
+      return self.new_dup(other.end + 1, self.end)
+    elsif other.begin > self.begin
+      return self.new_dup(self.begin, other.begin - 1)
+    end
+  end
+
+  # Returns true if there is overlap between the PositionRange 
+  # given as other, and this range.
+  #
+  # Other values are treated as Range normally does.
+  #
+  def ===(other)
+    if other.kind_of?(PositionRange)
+      if self.size > other.size
+        return ((self) === other.begin or (self) === other.end)
+      else
+        return ((other) === self.begin or (other) === self.end)
+      end
+    else
+      super(other)
+    end
+  end
+
   # Comparison
 
   # Comparisons happen in two stages.
@@ -182,6 +218,8 @@ class PositionRange
     return self.begin.to_s + ',' + self.end.to_s
   end
 
+  # Allows the dynamic adding of attributes
+  #
   def method_missing(method_id, *arguments)
     if method_id.to_s[-1..-1] == '='
       attribute = method_id.to_s.slice!(0...-1)

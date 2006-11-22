@@ -101,6 +101,25 @@ class PositionRange::List < Array
     end
   end
 
+  # Returns the index of the given PositionRange
+  #
+  # Options
+  # <tt>:dont_ignore_attributes</tt> => true, finds the one that has
+  #   also equal attributes, defaults to false
+  #
+  def index(position_range, options = {})
+    if options[:dont_ignore_attributes]
+      self.each_with_index do |s_p_r, i| 
+        if position_range == s_p_r and position_range.has_equal_pointer_attributes?(s_p_r)
+          return i
+        end
+      end
+      return nil
+    else
+      super(position_range)
+    end
+  end
+
   # Operations
 
   # Applies an intersection in the sense of Set theory.
@@ -113,7 +132,7 @@ class PositionRange::List < Array
   # 
   def &(other)
     substraction_list = other.dup.invert!
-    return self.dup.substract!(substraction_list,:ignore_attributes)
+    return self.dup.substract!(substraction_list,:ignore_attributes => true)
   end
 
   # Applies a substraction in the sense of Set theory.
@@ -135,29 +154,35 @@ class PositionRange::List < Array
   # Only substracts PositionRanges if all their attributes (except for first and 
   # last) are the same, unless ignore_attributes is specified.
   #
-  # NOTE: Self will be sorted.
-  #
-  def substract!(other,ignore_attributes = false)
-    self.sort!
-    if self.size > 0 and other.size > 0
-      other = other.dup.merge_adjacents!
+  def substract!(other,options = {})
+    ignore_attributes = options[:ignore_attributes]
+    
+    sorted_self = self.sort
+    if sorted_self.size > 0 and other.size > 0
+      other = other.sort.merge_adjacents!
 
       i = 0
       other.each do |p_r|
-        while self[i] and self[i].end < p_r.begin
+        while sorted_self[i] and sorted_self[i].end < p_r.begin
           i += 1
         end
-        while self[i] and self[i].begin <= p_r.end
-          if ignore_attributes or self[i].has_equal_pointer_attributes?(p_r)
-            if self[i].begin < p_r.begin
-              copy = self[i].dup
-              self[i] = copy.new_dup(copy.begin, p_r.begin - 1)
-              self.insert(i + 1, copy.new_dup(p_r.begin, copy.end))
+        while sorted_self[i] and sorted_self[i].begin <= p_r.end
+          if ignore_attributes or sorted_self[i].has_equal_pointer_attributes?(p_r)
+            self_i = self.index(sorted_self[i], :dont_ignore_attributes => !ignore_attributes)
+            if sorted_self[i].begin < p_r.begin
+              copy = sorted_self[i].dup
+              sorted_self[i] = copy.new_dup(copy.begin, p_r.begin - 1)
+              self[self_i] = sorted_self[i]
+              sorted_self.insert(i + 1, copy.new_dup(p_r.begin, copy.end))
+              self.insert(self_i + 1, sorted_self[i + 1])
               i += 1
-            elsif self[i].end <= p_r.end
-              self.delete_at(i)
+            elsif sorted_self[i].end <= p_r.end
+              sorted_self.delete_at(i)
+              self.delete_at(self_i)
             else
-              self[i] = self[i].new_dup(p_r.end + 1, self[i].end)
+              sorted_self[i] = sorted_self[i].new_dup(
+                  p_r.end + 1, sorted_self[i].end)
+              self[self_i] = sorted_self[i]
             end
           else
             i += 1
@@ -182,9 +207,11 @@ class PositionRange::List < Array
   # objects or ordering_positions of subclasses are not maintained, as 
   # they are meaningless for inverted lists of ranges.
   #
+  # NOTE: Also that self is sorted.
+  #
   def invert!(maximum_size = PositionRange::MaximumSize)
     if self.size > 0
-      self.merge_adjacents!
+      self.sort!.merge_adjacents!
       # sorts and prevents problems with adjacent ranges
       if self[-1].end > maximum_size
         raise PositionRange::Error.new(self[-1].begin, self[-1].end),
@@ -228,7 +255,7 @@ class PositionRange::List < Array
   # This is used for simplifying PositionRanges for parsing Links into Logis.
   #
   def line_up_overlaps!
-    self.merge_adjacents!
+    self.sort!.merge_adjacents!
     # note that the merging and the sorting done by merge_adjacents assures that 
     # he PositionRanges are always sorted by begin-position AND size (short to 
     # long).
@@ -266,8 +293,8 @@ class PositionRange::List < Array
   # Only merges adjacent PositionRanges if all their attributes
   # (except for first and last) are the same
   #
-  def merge_adjacents!(ignore_attributes = false)
-    self.sort!
+  def merge_adjacents!(options = {})
+    ignore_attributes = options[:ignore_attributes]
     if self.size > 1
       i = 0
       while i < self.size
