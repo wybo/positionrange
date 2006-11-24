@@ -291,13 +291,13 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('10,12:19,20'),
             PositionRange::List.from_s('13,18'))
 
-    # With multiple elements in one range to insert at
+    # with multiple elements in one range to insert at
     assert_equal PositionRange::List.from_s('0,10:35,36:33,34:15,20'),
         PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
             PositionRange::List.from_s('35,36:33,34'),
             PositionRange::List.from_s('11,14'))
 
-    # With cutting
+    # with cutting
     assert_equal PositionRange::List.from_s('0,7:50,63:8,10:15,20'),
         PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
             PositionRange::List.from_s('50,63'),
@@ -313,6 +313,10 @@ class PositionRangeListTest < Test::Unit::TestCase
   def test_stack_adjacent
     assert_equal PositionRange::List.from_s('0,3:4,23'),
         PositionRange::List.from_s('50,53:11,30').stack_adjacent
+
+    # with space inbetween
+    assert_equal PositionRange::List.from_s('0,3:5,24'),
+        PositionRange::List.from_s('50,53:11,30').stack_adjacent(:space => 1)
   end
 
   # Highlevel methods
@@ -388,6 +392,11 @@ class PositionRangeListTest < Test::Unit::TestCase
 
     p = PositionRange::List.from_s('0,408:500,520')
     assert_equal 'a' * p.range_size, p.apply_to_string('a' * 521)
+
+    # with separator
+    p = PositionRange::List.from_s('0,4:5,9')
+    assert_equal 'aaaaa&bbbbb', p.apply_to_string('aaaaabbbbb', :separator => '&')
+    assert_equal 'aaaaa%&bbbbb', p.apply_to_string('aaaaabbbbb', :separator => '%&')
 
     # empty
     assert_equal '', PositionRange::List.new.apply_to_string('12345')

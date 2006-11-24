@@ -413,13 +413,17 @@ class PositionRange::List < Array
   # So PositionRangeList.from_s('50,53:11,30').stack_adjacents
   # returns: PositionRangeList.from_s('0,3:4,23')
   #
-  def stack_adjacent
+  # Options
+  # <tt>:space</tt> => The space to leave inbetween
+  #
+  def stack_adjacent(options = {})
+    space = options[:space] || 0
     adjacent = PositionRange::List.new
     adjacent_p = 0
     self.collect do |p_r|
       step = p_r.size
       adjacent << PositionRange.new(adjacent_p, adjacent_p + step - 1)
-      adjacent_p += step
+      adjacent_p += step + space
     end
     return adjacent
   end
@@ -459,15 +463,19 @@ class PositionRange::List < Array
   # Appends the string[position_range] in the order in which they are 
   # found in this list.
   #
-  def apply_to_string(string)
+  # Options
+  # <tt>:separator</tt> => The string to insert between the parts
+  #
+  def apply_to_string(string, options = {})
+    separator = options[:separator] || ''
     new_string = ''
     self.each {|p_r|
       if p_r.end > string.size
         raise StandardError, 'End-range bigger than string'
       end
-      new_string += string[p_r]
+      new_string += string[p_r] + separator
     }
-    return new_string
+    return new_string[0..-1 - separator.size]
   end
 
   ### Parsing methods
