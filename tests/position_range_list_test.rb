@@ -184,6 +184,14 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('3,5:10,16') -
             PositionRange::List.from_s('6,2147483647')
 
+    assert_equal PositionRange::List.new,
+        PositionRange::List.from_s('5,15:16,25') - 
+            PositionRange::List.from_s('5,15:16,25:10,20')
+
+    assert_equal PositionRange::List.new,
+        PositionRange::List.from_s('5,15') - 
+            PositionRange::List.from_s('10,15:5,9')
+
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.from_s('2,5') -
@@ -204,6 +212,10 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.new(),
         PositionRange::List.new([p1]).substract!(
             PositionRange::List.new([p2]),:ignore_attributes => true)
+
+    old = PositionRange::List.from_s('5,15:16,25')
+    new = old.dup << PositionRange.new(10,20, :attr => 5)
+    assert_equal PositionRange::List.new, old - new
   end
 
   def test_delete

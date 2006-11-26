@@ -161,11 +161,13 @@ class PositionRange::List < Array
     if sorted_self.size > 0 and other.size > 0
       other = other.sort.merge_adjacents!
 
-      i = 0
+      last_i = 0
       other.each do |p_r|
+        i = last_i
         while sorted_self[i] and sorted_self[i].end < p_r.begin
           i += 1
         end
+        last_i = i
         while sorted_self[i] and sorted_self[i].begin <= p_r.end
           if ignore_attributes or sorted_self[i].has_equal_pointer_attributes?(p_r)
             self_i = self.index(sorted_self[i], :dont_ignore_attributes => !ignore_attributes)
