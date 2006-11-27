@@ -154,6 +154,9 @@ class PositionRange::List < Array
   # Only substracts PositionRanges if all their attributes (except for first and 
   # last) are the same, unless ignore_attributes is specified.
   #
+  # Options
+  # <tt>:ignore_attributes</tt> => Ignores attributes
+  #
   def substract!(other,options = {})
     ignore_attributes = options[:ignore_attributes]
     
