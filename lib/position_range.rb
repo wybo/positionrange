@@ -232,7 +232,7 @@ class PositionRange
     end
   end
 
-  # Defines the given string as an attribute
+  # Defines the given string as an attribute.
   #
   # (attr_accessor)
   #
