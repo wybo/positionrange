@@ -362,7 +362,7 @@ class PositionRange::List < Array
         cut = copy.end + p_r.begin - self_p
         self[i] = copy.new_dup(copy.begin, cut)
         self.insert(i + 1, copy.new_dup(cut + 1, copy.end))
-        self_p = cut
+        self_p = p_r.begin
       end
       if p_r.action == :ins
         inner_p = 0

@@ -320,6 +320,12 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('430,480'),
             PositionRange::List.from_s('159,209'),
             PositionRange::List.from_s('101,158'))
+
+    # the cut-bug
+    assert_equal PositionRange::List.from_s('0,750:101,149:20,30:150,188:40,50:189,250'),
+        PositionRange::List.from_s('0,750:101,250').insert_at_ranges!(
+            PositionRange::List.from_s('20,30:40,50'),
+            PositionRange::List.from_s('800,810:850,860'))
   end
 
   def test_stack_adjacent
