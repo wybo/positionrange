@@ -1,19 +1,16 @@
 #! /usr/bin/env ruby
-#
 #--#
-# Author: Wybo Wiersma <wybo@logilogi.org>
-#
-# Copyright: (c) 2006 Wybo Wiersma
+# Copyright: (c) 2006, 2007 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
-#   This file is part of the PositionRange library. PositionRange is free software. 
-#   You can run/distribute/modify/link PositionRange under the terms of the GNU 
-#   General Public License version 3, or any later version, with the extra copyleft 
-#   provision (covered by subsection 7b of the GP v3) that running a modified version 
-#   or a derivative work also requires you to make the sourcecode of that work
-#   available to everyone that can interact with it, this to ensure that PositionRange
-#   remains open and libre (doc/LICENSE.txt contains the full text of the legally
-#   binding license, including that of the extra restrictions).
+#   This file is part of the PositionRange Library. PositionRange is free 
+#   software. You can run/distribute/modify PositionRange under the terms of 
+#   the Affero General Public License version 1 or any later version. The 
+#   Affero GPL states that running a modified version or a derivative work 
+#   also requires you to make the sourcecode of that work available to 
+#   everyone that can interact with it. We chose the Affero GPL to ensure 
+#   that PositionRange remains open and libre (doc/LICENSE.txt contains the 
+#   full text of the legally binding license).
 #++#
 
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/../lib") if __FILE__ == $0
