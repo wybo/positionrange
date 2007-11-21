@@ -5,12 +5,12 @@
 # License:
 #   This file is part of the PositionRange Library. PositionRange is free 
 #   software. You can run/distribute/modify PositionRange under the terms of 
-#   the Affero General Public License version 1 or any later version. The 
-#   Affero GPL states that running a modified version or a derivative work 
-#   also requires you to make the sourcecode of that work available to 
-#   everyone that can interact with it. We chose the Affero GPL to ensure 
-#   that PositionRange remains open and libre (doc/LICENSE.txt contains the 
-#   full text of the legally binding license).
+#   the GNU Affero General Public License version 3. The Affero GPL states
+#   that running a modified version or a derivative work also requires you to
+#   make the sourcecode of that work available to everyone that can interact
+#   with it. We chose the Affero GPL to ensure that PositionRange remains open
+#   and libre (doc/LICENSE.txt contains the full text of the legally binding
+#   license).
 #++#
 
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/../lib") if __FILE__ == $0
