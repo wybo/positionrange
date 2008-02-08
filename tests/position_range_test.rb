@@ -1,6 +1,6 @@
 #! /usr/bin/env ruby
 #--#
-# Copyright: (c) 2006, 2007 The LogiLogi Foundation <foundation@logilogi.org>
+# Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
 #   This file is part of the PositionRange Library. PositionRange is free 
@@ -22,20 +22,6 @@ class PositionRangeTest < Test::Unit::TestCase
   def test_parsing
     assert_equal PositionRange.new(1,4), PositionRange.from_s('1,4')
     assert_equal '1,3', PositionRange.new(1,3).to_s
-  end
-
-  def test_exceptions_at_creation_time
-    assert_raise(StandardError) {
-      PositionRange.from_s('4,,2')
-    }
-
-    assert_raise(PositionRange::Error) {
-      PositionRange.new(4,2)
-    }
-
-    assert_raise(PositionRange::Error) {
-      PositionRange.new(-1,3)
-    }
   end
 
   def test_define_attribute
@@ -133,5 +119,19 @@ class PositionRangeTest < Test::Unit::TestCase
     assert p1.has_equal_pointer_attributes?(p2)
     p2.link = 'ac'
     assert !p1.has_equal_pointer_attributes?(p2)
+  end
+
+  def test_exceptions
+    assert_raise(StandardError) {
+      PositionRange.from_s('4,,2')
+    }
+
+    assert_raise(PositionRange::Error) {
+      PositionRange.new(4,2)
+    }
+
+    assert_raise(PositionRange::Error) {
+      PositionRange.new(-1,3)
+    }
   end
 end
