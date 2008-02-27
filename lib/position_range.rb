@@ -57,8 +57,8 @@ class PositionRange
 
   # Initializes a new PositionRange. 
   #
-  # Note that PositionRanges cannot be descending, nor exclude the 
-  # end-position from the range.
+  # Note that PositionRanges cannot be descending, nor include the
+  # end-position of the range.
   #
   # Options:
   # * <tt>:<any attribute you need></tt> - Usefull for associating Links and 
@@ -85,7 +85,7 @@ class PositionRange
       self.send(attribute.to_s + '=', options[attribute])
     end
 
-    super(first, last)
+    super(first, last, true)
   end
 
   ### Class methods
@@ -95,7 +95,7 @@ class PositionRange
   # The syntax is:
   # <begin position>,<end position>
   #
-  # Where the end position is included in the range.
+  # Where the end position is NOT included in the range.
   #
   # The options var allows one to pass options to the new PositionRange
   #
@@ -116,7 +116,7 @@ class PositionRange
   # negative sizes.
   #
   def size
-    return self.last - self.first + 1
+    return self.last - self.first
   end
 
   # Duplicates the current object, except for the two arguments requested, which set
@@ -138,14 +138,14 @@ class PositionRange
   # meaningfull output is guaranteed.
   #
   def -(other)
-    if other.begin > self.end or other.end < self.begin
+    if other.begin >= self.end or other.end <= self.begin
       return self
-    elsif other.begin <= self.begin and other.end >= self.end
+    elsif other.begin < self.begin and other.end > self.end
       return nil
     elsif other.end < self.end
-      return self.new_dup(other.end + 1, self.end)
+      return self.new_dup(other.end, self.end)
     elsif other.begin > self.begin
-      return self.new_dup(self.begin, other.begin - 1)
+      return self.new_dup(self.begin, other.begin)
     end
   end
 
@@ -172,8 +172,8 @@ class PositionRange
   #
   # First the begin-positions are compared.
   #
-  #     1..3 > 4..5 => true
-  #     1..3 > 2..3 => true
+  #     4..5 > 1..3 => true
+  #     2..3 > 1..3 => true
   #
   # If those are equal the end-positions are compared.
   #

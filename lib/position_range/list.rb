@@ -58,7 +58,7 @@ class PositionRange::List < Array
   #
   def self.new_around(string)
     if string.size > 0
-      return PositionRange::List.new([PositionRange.new(0,string.size - 1)])
+      return PositionRange::List.new([PositionRange.new(0,string.size)])
     else
       return PositionRange::List.new
     end
@@ -85,7 +85,7 @@ class PositionRange::List < Array
   #
   def below?(size)
     return self.within?(
-        PositionRange::List.new([PositionRange.new(0,size - 1)]))
+        PositionRange::List.new([PositionRange.new(0,size)]))
   end
 
   # Returns true if all PositionRanges in this list fall within the
@@ -126,7 +126,7 @@ class PositionRange::List < Array
   # PositionRanges given in the intersection_list are removed.
   #
   # Example:
-  # 1,5:7,8:10,11' becomes '2,5:11,11' after limiting to '2,6:11,40'
+  # 1,5:7,8:10,12' becomes '2,5:11,12' after limiting to '2,6:11,40'
   # 
   def &(other)
     substraction_list = other.dup.invert!
@@ -147,7 +147,7 @@ class PositionRange::List < Array
   # PositionRanges given as the other.
   #
   # So for example:
-  # 1,5:7,8:10,11' becomes '1,3:7,7:10,11' after substracting '4,6:8,9'
+  # 1,5:7,9:11,12' becomes '1,4:7,8:11,12' after substracting '4,6:8,9'
   #
   # Only substracts PositionRanges if all their attributes (except for first and 
   # last) are the same, unless ignore_attributes is specified.
@@ -169,12 +169,12 @@ class PositionRange::List < Array
           i += 1
         end
         last_i = i
-        while sorted_self[i] and sorted_self[i].begin <= p_r.end
+        while sorted_self[i] and sorted_self[i].begin < p_r.end
           if ignore_attributes or sorted_self[i].has_equal_pointer_attributes?(p_r)
             self_i = self.index(sorted_self[i], :dont_ignore_attributes => !ignore_attributes)
             if sorted_self[i].begin < p_r.begin
               copy = sorted_self[i].dup
-              sorted_self[i] = copy.new_dup(copy.begin, p_r.begin - 1)
+              sorted_self[i] = copy.new_dup(copy.begin, p_r.begin)
               self[self_i] = sorted_self[i]
               sorted_self.insert(i + 1, copy.new_dup(p_r.begin, copy.end))
               self.insert(self_i + 1, sorted_self[i + 1])
@@ -184,7 +184,7 @@ class PositionRange::List < Array
               self.delete_at(self_i)
             else
               sorted_self[i] = sorted_self[i].new_dup(
-                  p_r.end + 1, sorted_self[i].end)
+                  p_r.end, sorted_self[i].end)
               self[self_i] = sorted_self[i]
             end
           else
@@ -222,21 +222,21 @@ class PositionRange::List < Array
       end
       start_point = 0
       if self[0].begin > 0
-        self.insert(0, PositionRange.new(0, self[0].begin - 1))
+        self.insert(0, PositionRange.new(0, self[0].begin))
         start_point += 1
       end
       if self.size > 1
         (start_point...(self.size - 1)).each {|i|
-          self[i] = PositionRange.new(self[i].end + 1, self[i + 1].begin - 1)
+          self[i] = PositionRange.new(self[i].end, self[i + 1].begin)
         }
       end
       if self[-1].end < maximum_size - 1
-        self[-1] = PositionRange.new(self[-1].end + 1, maximum_size - 1)
+        self[-1] = PositionRange.new(self[-1].end, maximum_size)
       else
         self.delete_at(-1)
       end
     elsif maximum_size > 0
-      self.push(PositionRange.new(0, maximum_size - 1))
+      self.push(PositionRange.new(0, maximum_size))
     end
     return self
   end
@@ -251,7 +251,7 @@ class PositionRange::List < Array
   #   different or a new PositionRange.
   # 
   # Example:
-  # '3,7->a:5,9->b' lined up will be '3,4->a:5,7->a:5,7->b:8,9->b'
+  # '3,7->a:5,9->b' lined up will be '3,5->a:5,7->a:5,7->b:7,9->b'
   #
   # Where the ->X indicates an association with object X
   #
@@ -269,16 +269,16 @@ class PositionRange::List < Array
         if self[i].begin != self[i + 1].begin
           # the beginnings are not lined up, so align them
           self.insert(i + 1, self[i].new_dup(self[i + 1].begin, self[i].end))
-          self[i] = self[i].new_dup(self[i].begin, self[i + 1].begin - 1)
+          self[i] = self[i].new_dup(self[i].begin, self[i + 1].begin)
         elsif self[i].end != self[i + 1].end
           # the beginnings are already lined up, now do the ends
           if self[i].end < self[i + 1].end
             # i is the shortest, so self[i].end is used
-            self.insert(i + 2, self[i + 1].new_dup(self[i].end + 1, self[i + 1].end))
+            self.insert(i + 2, self[i + 1].new_dup(self[i].end, self[i + 1].end))
             self[i + 1] = self[i + 1].new_dup(self[i + 1].begin, self[i].end)
           else
             # i + 1 is the shortest, so self[i + 1].end is used
-            self.insert(i + 2, self[i].new_dup(self[i + 1].end + 1, self[i].end))
+            self.insert(i + 2, self[i].new_dup(self[i + 1].end, self[i].end))
             self[i] = self[i].new_dup(self[i].begin, self[i + 1].end)
           end
         end
@@ -291,7 +291,7 @@ class PositionRange::List < Array
   # Simplifies the PositionRange::List by merging adjacent PositionRanges.
   #
   # Example:
-  # 1,3:4,7:10,11 => 1,7:10,11
+  # 1,4:4,7:10,11 => 1,7:10,11
   #
   # Only merges adjacent PositionRanges if all their attributes
   # (except for first and last) are the same
@@ -301,7 +301,7 @@ class PositionRange::List < Array
     if self.size > 1
       i = 0
       while i < self.size
-        if self[i - 1].end + 1 == self[i].begin and 
+        if self[i - 1].end == self[i].begin and 
             (ignore_attributes or self[i - 1].has_equal_pointer_attributes?(self[i]))
           self[i - 1] = self[i - 1].new_dup(self[i - 1].begin, self[i].end)
           self.delete_at(i)
@@ -329,13 +329,13 @@ class PositionRange::List < Array
   # of this list, counted in range_size from it's beginning, and inter-
   # luded with ranges_to_skip.
   #
-  # So PositionRange::List.from_s('39,48:16,20').insert_at_ranges!(
+  # So PositionRange::List.from_s('39,49:16,20').insert_at_ranges!(
   #     PositionRange::List.from_s('100,102:6,7'),
   #     PositionRange::List.from_s('10,12:19,20'),
-  #     PositionRange::List.from_s('13,18'))
+  #     PositionRange::List.from_s('12,19'))
   #
   # will result in:
-  # PositionRange::List.from_s('39,48:100,102:6,7:16,20')
+  # PositionRange::List.from_s('39,49:100,102:6,7:16,20')
   #
   def insert_at_ranges!(ranges_to_insert, ranges_at_which_to_insert, 
       ranges_to_skip = [])
@@ -359,7 +359,7 @@ class PositionRange::List < Array
         copy = self[i]
         cut = copy.end + p_r.begin - self_p
         self[i] = copy.new_dup(copy.begin, cut)
-        self.insert(i + 1, copy.new_dup(cut + 1, copy.end))
+        self.insert(i + 1, copy.new_dup(cut, copy.end))
         self_p = p_r.begin
       end
       if p_r.action == :ins
@@ -401,7 +401,7 @@ class PositionRange::List < Array
     view_p = 0
     view_position_range_list.each {|snippet_p_r|
       translate_list = self & PositionRange::List.new(
-          [PositionRange.new(view_p,view_p + snippet_p_r.size - 1)])
+          [PositionRange.new(view_p,view_p + snippet_p_r.size)])
       vector = snippet_p_r.first - view_p
       absolute.concat(translate_list.translate!(vector))
       view_p += snippet_p_r.size
@@ -425,7 +425,7 @@ class PositionRange::List < Array
     adjacent_p = 0
     self.collect do |p_r|
       step = p_r.size
-      adjacent << PositionRange.new(adjacent_p, adjacent_p + step - 1)
+      adjacent << PositionRange.new(adjacent_p, adjacent_p + step)
       adjacent_p += step + space
     end
     return adjacent
@@ -438,7 +438,7 @@ class PositionRange::List < Array
   # get you a cluster arr equal to the following:
   #
   # [PositionRange::List.from_s('1,2:1,2'),
-  #  PositionRange::List.from_s('10,13'),
+  #  PositionRange::List.from_s('10,14'),
   #  PositionRange::List.from_s('14,18:14,18')]
   #
   # Except that the pointer_attributes are of course kept in order
