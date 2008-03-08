@@ -377,7 +377,7 @@ class PositionRange::List < Array
   end
 
   ### Highlevel methods
-  
+
   # Translates the PositionRange::List into the relative space defined
   # by the view_position_range_list
   #

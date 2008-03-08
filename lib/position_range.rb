@@ -89,7 +89,7 @@ class PositionRange
   end
 
   ### Class methods
-  
+
   # Creates a PositionRange from a string.
   #
   # The syntax is:
