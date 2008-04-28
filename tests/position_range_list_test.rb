@@ -19,7 +19,7 @@ require 'position_range/list'
 require 'test/unit'
 
 class PositionRangeListTest < Test::Unit::TestCase
-  # Parsing & Creating
+  ### Parsing & Creating
 
   def test_parsing
     assert_equal PositionRange::List.new([PositionRange.new(2,8)]),
@@ -41,7 +41,7 @@ class PositionRangeListTest < Test::Unit::TestCase
     }
   end
 
-  def test_new_for
+  def test_new_around
     assert_equal PositionRange::List.from_s('0,5'),
         PositionRange::List.new_around('12345')
     assert_equal PositionRange::List.from_s('0,3'),
@@ -50,7 +50,7 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.new_around('')
   end
 
-  # Getters
+  ### Getters
 
   def test_range_size
     assert_equal 5, PositionRange::List.from_s('2,4:5,8').range_size
@@ -96,56 +96,31 @@ class PositionRangeListTest < Test::Unit::TestCase
         :dont_ignore_attributes => true)
   end
 
-  # Lowlevel methods
+  ### Lowlevel methods
 
-  def test_merge_adjacents
-    # same pointer attributes
-    assert_equal PositionRange::List.from_s('2,8'),
-        PositionRange::List.from_s('2,4:4,8').merge_adjacents!
+  def test_intersection
+    assert_equal PositionRange::List.from_s('3,5:8,11'),
+        PositionRange::List.from_s('1,5:8,17') &
+            PositionRange::List.from_s('3,11')
 
-    assert_equal PositionRange::List.from_s('2,4:6,13'),
-        PositionRange::List.from_s('2,4:6,10:10,13').merge_adjacents!
+    assert_equal PositionRange::List.from_s('10,13'),
+        PositionRange::List.from_s('3,5:10,16') &
+            PositionRange::List.from_s('10,13')
 
-    assert_equal PositionRange::List.from_s('6,9:2,4:10,13'),
-        PositionRange::List.from_s('6,9:2,4:10,13').merge_adjacents!
-
-    assert_equal PositionRange::List.from_s('1,4'),
-        PositionRange::List.from_s('1,2:2,3:3,4').merge_adjacents!
-
-    # different pointer attributes
-    p1 = PositionRange.new(2,5,:link => :a)
-    p2 = PositionRange.new(5,8,:link => :b)
-    assert_equal PositionRange::List.from_s('2,5:5,8'),
-        PositionRange::List.new([p1,p2]).merge_adjacents!
-
-    assert_equal PositionRange::List.from_s('2,8'),
-        PositionRange::List.new([p1,p2]).merge_adjacents!(:ignore_attributes => true)
+    assert_equal PositionRange::List.from_s('4,11:13,21:22,29:35,42:62,68:342,349:357,360'),
+        PositionRange::List.from_s('4,11:13,21:22,29:35,42:62,68:342,349:357,360:410,420') &
+            PositionRange::List.from_s('0,408')
 
     # empty
     assert_equal PositionRange::List.new,
-        PositionRange::List.new.merge_adjacents!
-  end
-
-  def test_invert
-    # default maximum size
-    assert_equal PositionRange::List.from_s('0,5:15,' + PositionRange::MaximumSize.to_s),
-        PositionRange::List.from_s('5,15').invert!
-    assert_equal PositionRange::List.from_s('1,5:15,' + PositionRange::MaximumSize.to_s),
-        PositionRange::List.from_s('0,1:5,15').invert!
-    assert_equal PositionRange::List.from_s('15,' + PositionRange::MaximumSize.to_s),
-        PositionRange::List.from_s('0,5:5,15').invert!
-
-    # specified maximum size
-    assert_equal PositionRange::List.from_s('0,5:6,17:21,27'),
-        PositionRange::List.from_s('5,6:17,21:27,50').invert!(50)
-    assert_equal PositionRange::List.from_s('0,5:6,17:21,27:50,55'),
-        PositionRange::List.from_s('5,6:17,21:27,50').invert!(55)
-
-    # empty stuff
-    assert_equal PositionRange::List.from_s('0,55'),
-        PositionRange::List.new.invert!(55)
+        PositionRange::List.from_s('3,7') &
+            PositionRange::List.from_s('200,205')
     assert_equal PositionRange::List.new,
-        PositionRange::List.new.invert!(0)
+        PositionRange::List.from_s('4,77') &
+            PositionRange::List.new
+    assert_equal PositionRange::List.new,
+        PositionRange::List.new & 
+            PositionRange::List.new
   end
 
   def test_substract
@@ -216,29 +191,26 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('1,5:4,8').delete(PositionRange.new(3,6))
   end
 
-  def test_intersect
-    assert_equal PositionRange::List.from_s('3,5:8,11'),
-        PositionRange::List.from_s('1,5:8,17') &
-            PositionRange::List.from_s('3,11')
+  def test_invert
+    # default maximum size
+    assert_equal PositionRange::List.from_s('0,5:15,' + PositionRange::MaximumSize.to_s),
+        PositionRange::List.from_s('5,15').invert!
+    assert_equal PositionRange::List.from_s('1,5:15,' + PositionRange::MaximumSize.to_s),
+        PositionRange::List.from_s('0,1:5,15').invert!
+    assert_equal PositionRange::List.from_s('15,' + PositionRange::MaximumSize.to_s),
+        PositionRange::List.from_s('0,5:5,15').invert!
 
-    assert_equal PositionRange::List.from_s('10,13'),
-        PositionRange::List.from_s('3,5:10,16') &
-            PositionRange::List.from_s('10,13')
+    # specified maximum size
+    assert_equal PositionRange::List.from_s('0,5:6,17:21,27'),
+        PositionRange::List.from_s('5,6:17,21:27,50').invert!(50)
+    assert_equal PositionRange::List.from_s('0,5:6,17:21,27:50,55'),
+        PositionRange::List.from_s('5,6:17,21:27,50').invert!(55)
 
-    assert_equal PositionRange::List.from_s('4,11:13,21:22,29:35,42:62,68:342,349:357,360'),
-        PositionRange::List.from_s('4,11:13,21:22,29:35,42:62,68:342,349:357,360:410,420') &
-            PositionRange::List.from_s('0,408')
-
-    # empty
+    # empty stuff
+    assert_equal PositionRange::List.from_s('0,55'),
+        PositionRange::List.new.invert!(55)
     assert_equal PositionRange::List.new,
-        PositionRange::List.from_s('3,7') &
-            PositionRange::List.from_s('200,205')
-    assert_equal PositionRange::List.new,
-        PositionRange::List.from_s('4,77') &
-            PositionRange::List.new
-    assert_equal PositionRange::List.new,
-        PositionRange::List.new & 
-            PositionRange::List.new
+        PositionRange::List.new.invert!(0)
   end
 
   def test_line_up_overlaps
@@ -266,6 +238,34 @@ class PositionRangeListTest < Test::Unit::TestCase
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.new.line_up_overlaps!
+  end
+
+  def test_merge_adjacents
+    # same pointer attributes
+    assert_equal PositionRange::List.from_s('2,8'),
+        PositionRange::List.from_s('2,4:4,8').merge_adjacents!
+
+    assert_equal PositionRange::List.from_s('2,4:6,13'),
+        PositionRange::List.from_s('2,4:6,10:10,13').merge_adjacents!
+
+    assert_equal PositionRange::List.from_s('6,9:2,4:10,13'),
+        PositionRange::List.from_s('6,9:2,4:10,13').merge_adjacents!
+
+    assert_equal PositionRange::List.from_s('1,4'),
+        PositionRange::List.from_s('1,2:2,3:3,4').merge_adjacents!
+
+    # different pointer attributes
+    p1 = PositionRange.new(2,5,:link => :a)
+    p2 = PositionRange.new(5,8,:link => :b)
+    assert_equal PositionRange::List.from_s('2,5:5,8'),
+        PositionRange::List.new([p1,p2]).merge_adjacents!
+
+    assert_equal PositionRange::List.from_s('2,8'),
+        PositionRange::List.new([p1,p2]).merge_adjacents!(:ignore_attributes => true)
+
+    # empty
+    assert_equal PositionRange::List.new,
+        PositionRange::List.new.merge_adjacents!
   end
 
   def test_translate
@@ -321,16 +321,7 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('800,810:850,860'))
   end
 
-  def test_stack_adjacent
-    assert_equal PositionRange::List.from_s('0,3:3,23'),
-        PositionRange::List.from_s('50,53:10,30').stack_adjacent
-
-    # with space inbetween
-    assert_equal PositionRange::List.from_s('0,3:4,24'),
-        PositionRange::List.from_s('50,53:10,30').stack_adjacent(:space => 1)
-  end
-
-  # Highlevel methods
+  ### Highlevel methods
 
   def test_translate_to_view
     p = PositionRange::List.from_s('3,5:10,16')
@@ -380,6 +371,15 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.new,
         PositionRange::List.new.translate_from_view(
             PositionRange::List.from_s('5,8'))
+  end
+
+  def test_stack_adjacent
+    assert_equal PositionRange::List.from_s('0,3:3,23'),
+        PositionRange::List.from_s('50,53:10,30').stack_adjacent
+
+    # with space inbetween
+    assert_equal PositionRange::List.from_s('0,3:4,24'),
+        PositionRange::List.from_s('50,53:10,30').stack_adjacent(:space => 1)
   end
 
   def test_cluster_overlaps

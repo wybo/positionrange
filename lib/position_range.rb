@@ -216,6 +216,10 @@ class PositionRange
     return self.begin.to_s + ',' + self.end.to_s
   end
 
+  ### Sub-functions
+
+  protected
+
   # Allows the dynamic adding of attributes
   #
   def method_missing(method_id, *arguments)

@@ -19,14 +19,41 @@ require 'position_range'
 require 'test/unit'
 
 class PositionRangeTest < Test::Unit::TestCase
+  ### Initialization
+  
+  def test_initialization
+    p = PositionRange.new(2,6, :mooo => 88)
+    assert_equal 2, p.first
+    assert_equal 6, p.last
+    assert_equal 88, p.mooo
+  end
+
+  def test_initialization_exceptions
+    assert_raise(PositionRange::Error) {
+      PositionRange.new(4,2)
+    }
+    assert_raise(PositionRange::Error) {
+      PositionRange.new(-1,3)
+    }
+  end
+  
+  ### Parsing
+
   def test_parsing
     assert_equal PositionRange.new(1,4), PositionRange.from_s('1,4')
     assert_equal '1,3', PositionRange.new(1,3).to_s
   end
 
+  def test_parsing_exceptions
+    assert_raise(StandardError) {
+      PositionRange.from_s('4,,2')
+    }
+  end
+
+  ### Methods
+
   def test_define_attribute
-    p = PositionRange.new(1,2)
-    p.define_attribute('kk')
+    p = PositionRange.new(1,2, :kk => 0)
     assert p.respond_to?('kk')
     assert_equal ['kk'], p.attributes
     p.kk = 3
@@ -45,6 +72,10 @@ class PositionRangeTest < Test::Unit::TestCase
     assert_equal 2, p.blah
   end
 
+  def test_size
+    assert_equal 3, PositionRange.new(1,4).size
+  end
+
   def test_new_dup
     p = PositionRange.new(1,3)
     p.authorship = 'a'
@@ -54,10 +85,6 @@ class PositionRangeTest < Test::Unit::TestCase
 
     assert_equal p.authorship, pd.authorship
     assert_equal p.link, pd.link
-  end
-
-  def test_size
-    assert_equal 3, PositionRange.new(1,4).size
   end
 
   def test_substraction
@@ -119,19 +146,5 @@ class PositionRangeTest < Test::Unit::TestCase
     assert p1.has_equal_pointer_attributes?(p2)
     p2.link = 'ac'
     assert !p1.has_equal_pointer_attributes?(p2)
-  end
-
-  def test_exceptions
-    assert_raise(StandardError) {
-      PositionRange.from_s('4,,2')
-    }
-
-    assert_raise(PositionRange::Error) {
-      PositionRange.new(4,2)
-    }
-
-    assert_raise(PositionRange::Error) {
-      PositionRange.new(-1,3)
-    }
   end
 end

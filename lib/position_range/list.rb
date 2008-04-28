@@ -118,7 +118,7 @@ class PositionRange::List < Array
     end
   end
 
-  # Operations
+  ### Low level operations
 
   # Applies an intersection in the sense of Set theory.
   #
