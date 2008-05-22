@@ -132,6 +132,10 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('1,15') - 
             PositionRange::List.from_s('1,2:6,7:12,20')
 
+    assert_equal PositionRange::List.from_s('1,2:5,8'),
+        PositionRange::List.from_s('1,8') - 
+            PositionRange::List.from_s('2,5')
+
     assert_equal PositionRange::List.from_s('1,3:9,11'),
         PositionRange::List.from_s('1,5:7,11') -
             PositionRange::List.from_s('3,9')
