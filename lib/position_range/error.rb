@@ -2,8 +2,8 @@
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
-#   This file is part of the PositionRange Library. PositionRange is Free 
-#   Software. You can run/distribute/modify PositionRange under the terms of 
+#   This file is part of the PositionRange Library. PositionRange is Free
+#   Software. You can run/distribute/modify PositionRange under the terms of
 #   the GNU Affero General Public License version 3. The Affero GPL states
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact

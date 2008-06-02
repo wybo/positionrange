@@ -3,8 +3,8 @@
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
-#   This file is part of the PositionRange Library. PositionRange is free 
-#   software. You can run/distribute/modify PositionRange under the terms of 
+#   This file is part of the PositionRange Library. PositionRange is free
+#   software. You can run/distribute/modify PositionRange under the terms of
 #   the GNU Affero General Public License version 3. The Affero GPL states
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
@@ -119,21 +119,21 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('4,77') &
             PositionRange::List.new
     assert_equal PositionRange::List.new,
-        PositionRange::List.new & 
+        PositionRange::List.new &
             PositionRange::List.new
   end
 
   def test_substract
     assert_equal PositionRange::List.new,
-        PositionRange::List.from_s('2,7') - 
+        PositionRange::List.from_s('2,7') -
             PositionRange::List.from_s('1,8')
 
     assert_equal PositionRange::List.from_s('2,6:7,12'),
-        PositionRange::List.from_s('1,15') - 
+        PositionRange::List.from_s('1,15') -
             PositionRange::List.from_s('1,2:6,7:12,20')
 
     assert_equal PositionRange::List.from_s('1,2:5,8'),
-        PositionRange::List.from_s('1,8') - 
+        PositionRange::List.from_s('1,8') -
             PositionRange::List.from_s('2,5')
 
     assert_equal PositionRange::List.from_s('1,3:9,11'),
@@ -161,7 +161,7 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('6,2147483647')
 
     assert_equal PositionRange::List.new,
-        PositionRange::List.from_s('5,15:16,25') - 
+        PositionRange::List.from_s('5,15:16,25') -
             PositionRange::List.from_s('5,15:16,25:10,20')
 
     # empty

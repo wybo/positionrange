@@ -2,8 +2,8 @@
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
-#   This file is part of the PositionRange Library. PositionRange is Free 
-#   Software. You can run/distribute/modify PositionRange under the terms of 
+#   This file is part of the PositionRange Library. PositionRange is Free
+#   Software. You can run/distribute/modify PositionRange under the terms of
 #   the GNU Affero General Public License version 3. The Affero GPL states
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
@@ -18,11 +18,11 @@ require 'position_range'
 
 class PositionRange::List < Array
 
-  ###### Regular expressions  
+  ###### Regular expressions
 
   # Check-regexps
-  CHECK_POSITION_RANGE_LIST_RE = 
-      /^(#{PositionRange::BLOCK_POSITION_RANGE}(\:#{PositionRange::BLOCK_POSITION_RANGE})*)?$/ 
+  CHECK_POSITION_RANGE_LIST_RE =
+      /^(#{PositionRange::BLOCK_POSITION_RANGE}(\:#{PositionRange::BLOCK_POSITION_RANGE})*)?$/
 
   ###### Class methods
 
@@ -32,13 +32,13 @@ class PositionRange::List < Array
   # <position range string>[:<position range string>]*
   #
   # Options:
-  # The argument pass_on_options allows you to give options to be passed on to the 
+  # The argument pass_on_options allows you to give options to be passed on to the
   # PositionRanges created from the string
   #
   def self.from_s(position_range_list_string, pass_on_options = {})
     if position_range_list_string
       if position_range_list_string !~ CHECK_POSITION_RANGE_LIST_RE
-        raise StandardError.new(), 'Invalid position_range_list string given: ' + 
+        raise StandardError.new(), 'Invalid position_range_list string given: ' +
             position_range_list_string
       end
 
@@ -107,7 +107,7 @@ class PositionRange::List < Array
   #
   def index(position_range, options = {})
     if options[:dont_ignore_attributes]
-      self.each_with_index do |s_p_r, i| 
+      self.each_with_index do |s_p_r, i|
         if position_range == s_p_r and position_range.has_equal_pointer_attributes?(s_p_r)
           return i
         end
@@ -122,12 +122,12 @@ class PositionRange::List < Array
 
   # Applies an intersection in the sense of Set theory.
   #
-  # All PositionRanges and parts of PositionRanges that fall outside the 
+  # All PositionRanges and parts of PositionRanges that fall outside the
   # PositionRanges given in the intersection_list are removed.
   #
   # Example:
   # 1,5:7,8:10,12' becomes '2,5:11,12' after limiting to '2,6:11,40'
-  # 
+  #
   def &(other)
     substraction_list = other.dup.invert!
     return self.dup.substract!(substraction_list,:ignore_attributes => true)
@@ -149,7 +149,7 @@ class PositionRange::List < Array
   # So for example:
   # 1,5:7,9:11,12' becomes '1,4:7,8:11,12' after substracting '4,6:8,9'
   #
-  # Only substracts PositionRanges if all their attributes (except for first and 
+  # Only substracts PositionRanges if all their attributes (except for first and
   # last) are the same, unless ignore_attributes is specified.
   #
   # Options
@@ -157,7 +157,7 @@ class PositionRange::List < Array
   #
   def substract!(other,options = {})
     ignore_attributes = options[:ignore_attributes]
-    
+
     sorted_self = self.sort
     if sorted_self.size > 0 and other.size > 0
       other = other.sort.merge_adjacents!
@@ -207,7 +207,7 @@ class PositionRange::List < Array
   # range below maximum_size.
   #
   # NOTE: new ranges are created as PositionRanges, so references to
-  # objects or ordering_positions of subclasses are not maintained, as 
+  # objects or ordering_positions of subclasses are not maintained, as
   # they are meaningless for inverted lists of ranges.
   #
   # NOTE: Also that self is sorted.
@@ -242,14 +242,14 @@ class PositionRange::List < Array
   end
 
   # Makes sure that there are no non-overlapping borders between PositionRanges.
-  # 
+  #
   # The guaranteed situation after calling this method:
   # * Multiple PositionRanges can refer to the same ranges, but if they do they will
   #   have the same begin and end position.
-  # * All positions associated with an object (a Link or an Authorship for example) 
-  #   will still be associated with that same object, but possibly through a 
+  # * All positions associated with an object (a Link or an Authorship for example)
+  #   will still be associated with that same object, but possibly through a
   #   different or a new PositionRange.
-  # 
+  #
   # Example:
   # '3,7->a:5,9->b' lined up will be '3,5->a:5,7->a:5,7->b:7,9->b'
   #
@@ -259,8 +259,8 @@ class PositionRange::List < Array
   #
   def line_up_overlaps!
     self.sort!.merge_adjacents!
-    # note that the merging and the sorting done by merge_adjacents assures that 
-    # he PositionRanges are always sorted by begin-position AND size (short to 
+    # note that the merging and the sorting done by merge_adjacents assures that
+    # he PositionRanges are always sorted by begin-position AND size (short to
     # long).
     i = 0
     while i < (self.size - 1)
@@ -301,7 +301,7 @@ class PositionRange::List < Array
     if self.size > 1
       i = 0
       while i < self.size
-        if self[i - 1].end == self[i].begin and 
+        if self[i - 1].end == self[i].begin and
             (ignore_attributes or self[i - 1].has_equal_pointer_attributes?(self[i]))
           self[i - 1] = self[i - 1].new_dup(self[i - 1].begin, self[i].end)
           self.delete_at(i)
@@ -325,7 +325,7 @@ class PositionRange::List < Array
     return self
   end
 
-  # The ranges_to_insert are inserted at the ranges_at_which_to_insert 
+  # The ranges_to_insert are inserted at the ranges_at_which_to_insert
   # of this list, counted in range_size from it's beginning, and inter-
   # luded with ranges_to_skip.
   #
@@ -337,7 +337,7 @@ class PositionRange::List < Array
   # will result in:
   # PositionRange::List.from_s('39,49:100,102:6,7:16,20')
   #
-  def insert_at_ranges!(ranges_to_insert, ranges_at_which_to_insert, 
+  def insert_at_ranges!(ranges_to_insert, ranges_at_which_to_insert,
       ranges_to_skip = [])
     if ranges_to_insert.range_size != ranges_at_which_to_insert.range_size
       raise StandardError, 'Ranges to insert, and at which to insert are ' +
@@ -434,7 +434,7 @@ class PositionRange::List < Array
   # Adds all items to a cluster-array, where overlapping PositionRanges are
   # added to the same cluster_array position.
   #
-  # So PositionRange::List.from_s('1,2:1,2:10,18:14,18').cluster_overlaps will 
+  # So PositionRange::List.from_s('1,2:1,2:10,18:14,18').cluster_overlaps will
   # get you a cluster arr equal to the following:
   #
   # [PositionRange::List.from_s('1,2:1,2'),
@@ -463,7 +463,7 @@ class PositionRange::List < Array
   # Returns a new string containing only the parts of the old string
   # designated by position_ranges.
   #
-  # Appends the string[position_range] in the order in which they are 
+  # Appends the string[position_range] in the order in which they are
   # found in this list.
   #
   # Options

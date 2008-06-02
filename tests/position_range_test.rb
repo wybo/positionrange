@@ -3,8 +3,8 @@
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
-#   This file is part of the PositionRange Library. PositionRange is free 
-#   software. You can run/distribute/modify PositionRange under the terms of 
+#   This file is part of the PositionRange Library. PositionRange is free
+#   software. You can run/distribute/modify PositionRange under the terms of
 #   the GNU Affero General Public License version 3. The Affero GPL states
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
@@ -20,7 +20,7 @@ require 'test/unit'
 
 class PositionRangeTest < Test::Unit::TestCase
   ### Initialization
-  
+
   def test_initialization
     p = PositionRange.new(2,6, :mooo => 88)
     assert_equal 2, p.first
@@ -36,7 +36,7 @@ class PositionRangeTest < Test::Unit::TestCase
       PositionRange.new(-1,3)
     }
   end
-  
+
   ### Parsing
 
   def test_parsing

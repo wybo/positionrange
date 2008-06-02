@@ -2,8 +2,8 @@
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
 # License:
-#   This file is part of the PositionRange Library. PositionRange is Free 
-#   Software. You can run/distribute/modify PositionRange under the terms of 
+#   This file is part of the PositionRange Library. PositionRange is Free
+#   Software. You can run/distribute/modify PositionRange under the terms of
 #   the GNU Affero General Public License version 3. The Affero GPL states
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
@@ -19,11 +19,11 @@
 # You can do most interesting things with PositionRanges in a
 # PositionRangeList.
 #
-# They are wrappers around the Range class, and tus can be directly fed into the 
+# They are wrappers around the Range class, and tus can be directly fed into the
 # index-operator of strings.
 #
-# PositionRanges are including the last position, so: 
-# 
+# PositionRanges are including the last position, so:
+#
 # first..last, not first...last
 
 class PositionRange < Range
@@ -55,13 +55,13 @@ require 'position_range/list'
 class PositionRange
   ### Constructors
 
-  # Initializes a new PositionRange. 
+  # Initializes a new PositionRange.
   #
   # Note that PositionRanges cannot be descending, nor include the
   # end-position of the range.
   #
   # Options:
-  # * <tt>:<any attribute you need></tt> - Usefull for associating Links and 
+  # * <tt>:<any attribute you need></tt> - Usefull for associating Links and
   #     Authorships with this range.
   #
   # NOTE: The associations set in this way are not 2-way like in Rails
@@ -74,7 +74,7 @@ class PositionRange
       raise PositionRange::Error.new(first, last), 'Tried to create a descending PositionRange'
     end
     if last > MaximumSize
-      raise PositionRange::Error.new(first, last), 'Tried to create a PositionRange that is' + 
+      raise PositionRange::Error.new(first, last), 'Tried to create a PositionRange that is' +
           ' larger than the MaximumSize'
     end
 
@@ -101,7 +101,7 @@ class PositionRange
   #
   def self.from_s(position_range_string, options = {})
     if position_range_string !~ CHECK_POSITION_RANGE_RE
-      raise StandardError.new, 'Invalid position_range string given: ' + 
+      raise StandardError.new, 'Invalid position_range string given: ' +
           position_range_string
     end
     p_r_arr = position_range_string.split(',')
@@ -133,8 +133,8 @@ class PositionRange
   # Returns this PositionRange substracted by the previous
   #
   # NOTE: The substracted PositionRange must overlap with at least
-  # one side of this one. If it's begin-position is bigger than this 
-  # one's and it's end position smaller than this one's, no 
+  # one side of this one. If it's begin-position is bigger than this
+  # one's and it's end position smaller than this one's, no
   # meaningfull output is guaranteed.
   #
   def -(other)
@@ -149,7 +149,7 @@ class PositionRange
     end
   end
 
-  # Returns true if there is overlap between the PositionRange 
+  # Returns true if there is overlap between the PositionRange
   # given as other, and this range.
   #
   # Other values are treated as Range normally does.
