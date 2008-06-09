@@ -83,6 +83,8 @@ class PositionRange::List < Array
   # Returns true if all PositionRanges in this list don't refer to
   # positions bigger than size. Otherwise false.
   #
+  # Attributes are ignored.
+  #
   def below?(size)
     return self.within?(
         PositionRange::List.new([PositionRange.new(0,size)]))
@@ -91,8 +93,10 @@ class PositionRange::List < Array
   # Returns true if all PositionRanges in this list fall within the
   # PositionRanges in the given other PositionRange::List
   #
+  # Attributes are ignored.
+  #
   def within?(other)
-    if (self - other).empty?
+    if (self.dup.substract!(other, :ignore_attributes => true)).empty?
       return true
     else
       return false
