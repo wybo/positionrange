@@ -274,6 +274,7 @@ class PositionRange::List < Array
           # the beginnings are not lined up, so align them
           self.insert(i + 1, self[i].new_dup(self[i + 1].begin, self[i].end))
           self[i] = self[i].new_dup(self[i].begin, self[i + 1].begin)
+          i = -1; self.sort! # restart in case more than 1 overlap
         elsif self[i].end != self[i + 1].end
           # the beginnings are already lined up, now do the ends
           if self[i].end < self[i + 1].end
@@ -285,6 +286,7 @@ class PositionRange::List < Array
             self.insert(i + 2, self[i].new_dup(self[i + 1].end, self[i].end))
             self[i] = self[i].new_dup(self[i].begin, self[i + 1].end)
           end
+          i = -1; self.sort! # restart in case more than 1 overlap
         end
       end
       i += 1

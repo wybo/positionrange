@@ -239,6 +239,40 @@ class PositionRangeListTest < Test::Unit::TestCase
 
     assert_equal output, p.line_up_overlaps!
 
+    # ender
+    p = PositionRange::List.new([
+            PositionRange.new(28,38, :lo => 1),
+            PositionRange.new(31,38, :la => 2),
+            PositionRange.new(33,38, :lu => 3)])
+
+    output = PositionRange::List.new([
+        PositionRange.new(28,31, :lo => 1),
+        PositionRange.new(31,33, :la => 2),
+        PositionRange.new(31,33, :lo => 1),
+        PositionRange.new(33,38, :lu => 3),
+        PositionRange.new(33,38, :la => 2),
+        PositionRange.new(33,38, :lo => 1)])
+
+    assert_equal output, p.line_up_overlaps!
+
+    # middler
+    p = PositionRange::List.new([
+            PositionRange.new(43,61, :lo => 1),
+            PositionRange.new(45,58, :la => 2),
+            PositionRange.new(48,58, :lu => 3)])
+ 
+    p = PositionRange::List.from_s('43,61:45,58:48,58')
+    output = PositionRange::List.new([
+        PositionRange.new(43,45, :lo => 1),
+        PositionRange.new(45,48, :la => 2),
+        PositionRange.new(45,48, :lo => 1),
+        PositionRange.new(48,58, :lu => 3),
+        PositionRange.new(48,58, :la => 2),
+        PositionRange.new(48,58, :lo => 1),
+        PositionRange.new(58,61, :lo => 1)])
+
+    assert_equal output, p.line_up_overlaps!
+
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.new.line_up_overlaps!
