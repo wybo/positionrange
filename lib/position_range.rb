@@ -8,23 +8,27 @@
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
 #   with it. We chose the Affero GPL to ensure that PositionRange remains open
-#   and libre (doc/LICENSE.txt contains the full text of the legally binding
+#   and libre (LICENSE.txt contains the full text of the legally binding
 #   license).
 #++#
 #
 # PositionRanges allow one to model ranges of text.
 #
-# PositionRanges can be compared, sorted and parsed from and to strings.
+# PositionRanges can be compared, sorted and parsed from and to
+# strings.
 #
 # You can do most interesting things with PositionRanges in a
 # PositionRangeList.
 #
-# They are wrappers around the Range class, and tus can be directly fed into the
-# index-operator of strings.
+# They are wrappers around the Range class, and thus can be directly
+# fed into the index-operator of strings.
 #
-# PositionRanges are including the last position, so:
+# PositionRanges are excluding the last position, so:
 #
-# first..last, not first...last
+# first...last, not first..last
+
+$:.unshift(File.dirname(__FILE__)) unless
+  $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 class PositionRange < Range
   include Comparable
@@ -57,14 +61,11 @@ class PositionRange
 
   # Initializes a new PositionRange.
   #
-  # Note that PositionRanges cannot be descending, nor include the
-  # end-position of the range.
+  # Note that PositionRanges cannot be descending.
   #
   # Options:
-  # * <tt>:<any attribute you need></tt> - Usefull for associating Links and
-  #     Authorships with this range.
-  #
-  # NOTE: The associations set in this way are not 2-way like in Rails
+  # * <tt>:<any attribute you need></tt> - Usefull for associating Links or
+  #     Remarks with this range.
   #
   def initialize(first, last, options = {})
     if first < 0
@@ -95,9 +96,10 @@ class PositionRange
   # The syntax is:
   # <begin position>,<end position>
   #
-  # Where the end position is NOT included in the range.
+  # Where the end position is included in the range.
   #
-  # The options var allows one to pass options to the new PositionRange
+  # The optional options var allows one to pass attributes to the new
+  # PositionRange
   #
   def self.from_s(position_range_string, options = {})
     if position_range_string !~ CHECK_POSITION_RANGE_RE
@@ -110,17 +112,17 @@ class PositionRange
 
   ### Methods
 
-  # Returns the size of the range, that is last - first + 1
+  # Returns the size of the range, that is last - first
   #
-  # NOTE that PositionRanges cannot become negative, thus np. with
-  # negative sizes.
+  # NOTE that PositionRanges cannot become negative.
   #
   def size
     return self.last - self.first
   end
 
-  # Duplicates the current object, except for the two arguments requested, which set
-  # the begin and end positions of the new PositionRange.
+  # Duplicates the current object, except for the two required
+  # arguments, which set the begin and end positions of the new
+  # PositionRange.
   #
   def new_dup(first, last)
     attributes_hash = Hash.new

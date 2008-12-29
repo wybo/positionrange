@@ -8,7 +8,7 @@
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
 #   with it. We chose the Affero GPL to ensure that PositionRange remains open
-#   and libre (doc/LICENSE.txt contains the full text of the legally binding
+#   and libre (LICENSE.txt contains the full text of the legally binding
 #   license).
 #++#
 #

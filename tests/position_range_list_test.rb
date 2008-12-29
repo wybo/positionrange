@@ -1,4 +1,3 @@
-#! /usr/bin/env ruby
 #--#
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
@@ -9,14 +8,11 @@
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
 #   with it. We chose the Affero GPL to ensure that PositionRange remains open
-#   and libre (doc/LICENSE.txt contains the full text of the legally binding
+#   and libre (LICENSE.txt contains the full text of the legally binding
 #   license).
 #++#
 
-$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/../lib") if __FILE__ == $0
-
-require 'position_range/list'
-require 'test/unit'
+require File.dirname(__FILE__) + '/test_helper.rb'
 
 class PositionRangeListTest < Test::Unit::TestCase
   ### Parsing & Creating

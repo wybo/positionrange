@@ -1,4 +1,3 @@
-#! /usr/bin/env ruby
 #--#
 # Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
 #
@@ -9,14 +8,11 @@
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
 #   with it. We chose the Affero GPL to ensure that PositionRange remains open
-#   and libre (doc/LICENSE.txt contains the full text of the legally binding
+#   and libre (LICENSE.txt contains the full text of the legally binding
 #   license).
 #++#
 
-$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/../lib") if __FILE__ == $0
-
-require 'position_range'
-require 'test/unit'
+require File.dirname(__FILE__) + '/test_helper.rb'
 
 class PositionRangeTest < Test::Unit::TestCase
   ### Initialization
@@ -55,13 +51,13 @@ class PositionRangeTest < Test::Unit::TestCase
   def test_define_attribute
     p = PositionRange.new(1,2, :kk => 0)
     assert p.respond_to?('kk')
-    assert_equal ['kk'], p.attributes
     p.kk = 3
     assert_equal 3, p.kk
     p.lll = 5
-    assert_equal ['kk','lll'], p.attributes
+    assert_equal 5, p.lll
     p2 = PositionRange.new(1,2)
-    assert_equal ['kk','lll'], p2.attributes
+    assert p2.attributes.include?('kk')
+    assert p2.attributes.include?('lll')
   end
 
   def test_dynamic_attributes

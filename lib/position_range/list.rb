@@ -8,13 +8,14 @@
 #   that running a modified version or a derivative work also requires you to
 #   make the sourcecode of that work available to everyone that can interact
 #   with it. We chose the Affero GPL to ensure that PositionRange remains open
-#   and libre (doc/LICENSE.txt contains the full text of the legally binding
+#   and libre (LICENSE.txt contains the full text of the legally binding
 #   license).
 #++#
 #
-# Keeps a list of PositionRanges
-
-require 'position_range'
+# Keeps a list of PositionRanges.
+#
+# Supports basic set operations, as well as many others, like
+# clustering overlaps and getting sizes.
 
 class PositionRange::List < Array
 
@@ -32,8 +33,8 @@ class PositionRange::List < Array
   # <position range string>[:<position range string>]*
   #
   # Options:
-  # The argument pass_on_options allows you to give options to be passed on to the
-  # PositionRanges created from the string
+  # The argument pass_on_options allows you to give options to be
+  # passed on to the PositionRanges created from the string
   #
   def self.from_s(position_range_list_string, pass_on_options = {})
     if position_range_list_string
@@ -103,11 +104,11 @@ class PositionRange::List < Array
     end
   end
 
-  # Returns the index of the given PositionRange
+  # Returns the index of the given PositionRange.
   #
   # Options
   # <tt>:dont_ignore_attributes</tt> => true, finds the one that has
-  #   also equal attributes, defaults to false
+  # also equal attributes, defaults to false
   #
   def index(position_range, options = {})
     if options[:dont_ignore_attributes]
@@ -126,8 +127,8 @@ class PositionRange::List < Array
 
   # Applies an intersection in the sense of Set theory.
   #
-  # All PositionRanges and parts of PositionRanges that fall outside the
-  # PositionRanges given in the intersection_list are removed.
+  # All PositionRanges and parts of PositionRanges that fall outside
+  # the PositionRanges given in the intersection_list are removed.
   #
   # Example:
   # 1,5:7,8:10,12' becomes '2,5:11,12' after limiting to '2,6:11,40'
@@ -245,27 +246,29 @@ class PositionRange::List < Array
     return self
   end
 
-  # Makes sure that there are no non-overlapping borders between PositionRanges.
+  # Makes sure that there are no non-overlapping borders between
+  # PositionRanges.
   #
   # The guaranteed situation after calling this method:
-  # * Multiple PositionRanges can refer to the same ranges, but if they do they will
-  #   have the same begin and end position.
-  # * All positions associated with an object (a Link or an Authorship for example)
-  #   will still be associated with that same object, but possibly through a
-  #   different or a new PositionRange.
+  # * Multiple PositionRanges can refer to the same ranges, but if
+  #   they do they will have the same begin and end position.
+  # * All positions associated with an object (a Link or an Authorship
+  #   for example) will still be associated with that same object, but
+  #   possibly through a different or a new PositionRange.
   #
   # Example:
   # '3,7->a:5,9->b' lined up will be '3,5->a:5,7->a:5,7->b:7,9->b'
   #
   # Where the ->X indicates an association with object X
   #
-  # This is used for simplifying PositionRanges for parsing Links into Logis.
+  # This is used for simplifying PositionRanges for parsing Links into
+  # Logis.
   #
   def line_up_overlaps!
     self.sort!.merge_adjacents!
-    # note that the merging and the sorting done by merge_adjacents assures that
-    # he PositionRanges are always sorted by begin-position AND size (short to
-    # long).
+    # note that the merging and the sorting done by merge_adjacents
+    # assures that he PositionRanges are always sorted by
+    # begin-position AND size (short to long).
     i = 0
     while i < (self.size - 1)
       if self[i].end > self[i + 1].begin
