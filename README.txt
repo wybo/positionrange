@@ -14,32 +14,44 @@ http://www.logilogi.org (http://foundation.logilogi.org).
 
 == Usage
 
+First require it.
+
+  $ irb
+
+  > require 'rubygems'
+  > require 'positionrange'
+
 You can assign random attributes to PositionRanges.
 
-  r = PositionRange.new(1,10, :cow => 'moo')
-
-  r.cow => 'moo'
+  > r = PositionRange.new(1,10, :cow => 'moo')
+  => 1...10
+  > r.cow
+  => "moo"
 
 You can also create a PositionRange::List directly from a string.
 
-  l = PositionRange::List.from_s('0,10:5,15')
+  > l = PositionRange::List.from_s('0,10:5,15')
+  => [0...10, 5...15]
 
 Then you can get the combined size.
 
-  l.range_size => 20
+  > l.range_size 
+  => 20
 
 Or line up overlaps.
 
-  l.line_up_overlaps!.to_s => '0,5:5,10:5,10:10,15'
+  > l.line_up_overlaps!.to_s 
+  => "0,5:5,10:5,10:10,15"
 
 Clustering overlaps maintains attributes.
 
-  l = PositionRange::List.new([
-        PositionRange.new(0,10, :cow => 'moo'),
-        PositionRange.new(5,15, :goat => 7)
-      ])
+  > l = PositionRange::List.new([
+              PositionRange.new(0,10, :cow => 'moo'),
+              PositionRange.new(5,15, :goat => 7)
+            ])
+  => [0...10, 5...15]
 
-  l.cluster_overlaps => [
+  > output = [
         PositionRange::List.new([
             PositionRange.new(0,5, :cow => 'moo')]),
         PositionRange::List.new([
@@ -48,6 +60,10 @@ Clustering overlaps maintains attributes.
         PositionRange::List.new([
             PositionRange.new(10,15, :goat => 7)])
       ]
+  => [[0...5], [5...10, 5...10], [10...15]]
+ 
+  > l.cluster_overlaps == output
+  => true
 
 == Download
 
