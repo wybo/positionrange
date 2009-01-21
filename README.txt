@@ -73,7 +73,7 @@ The latest version of Position Range can be found at:
 
 Documentation can be found at:
 
-* http://positionrange.rubyonrails.org
+* http://positionrange.rubyforge.org
 
 == Installation
 
