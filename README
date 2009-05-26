@@ -101,12 +101,10 @@ This documentation can be browsed online at:
 == Copyrights
 
 Position Range and these docs are Copyright (c) 2006-2009 The LogiLogi
-Foundation. Position Range is licensed under the {Affero General Public
-License}[http://www.fsf.org/licensing/licenses/agpl-3.0.html].
+Foundation. Position Range is licensed under the {GNU Lesser General 
+Public License}[http://www.gnu.org/licenses/lgpl-3.0-standalone.html].
 These docs are available under the {Creative Commons Attribution-Share
 Alike License}[http://creativecommons.org/licenses/by-sa/3.0/].
 
-If you want to use Position Range in a publicly accessable application
-that is not Free Software (that means not Affero GPLed), then please
-{contact us}[mailto:foundation@logilogi.org] for single server
-licenses or special arrangements.
+You can use Position Range in an application that is not Free Software
+but Position Range itself remains Free Software.
