@@ -57,6 +57,7 @@ class PositionRangeListTest < Test::Unit::TestCase
   def test_below
     assert PositionRange::List.from_s('1,3:5,6').below?(7)
     assert PositionRange::List.from_s('0,408:500,520').below?(520)
+    assert PositionRange::List.from_s('43,48').below?(559)
     assert_equal false,
         PositionRange::List.from_s('0,408:500,520').below?(519)
   end

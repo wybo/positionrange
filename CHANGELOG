@@ -1,4 +1,4 @@
-*0.6.5* (26 May 2009)
+*0.6.6* (26 May 2009)
 
 * Fixed bug in translate_to/from_view
 * Added non-'!' alternatives to methods

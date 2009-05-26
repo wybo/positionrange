@@ -206,7 +206,7 @@ class PositionRange::List < Array
   # See substract!
   #
   def substract(other, options = {})
-    self.dup.substract!(other)
+    self.dup.substract!(other, options)
   end
 
   # Deletes the position_range that is specified.
@@ -267,7 +267,7 @@ class PositionRange::List < Array
   # See invert!
   #
   def invert(maximum_size = PositionRange::MaximumSize)
-    self.dup.invert!
+    self.dup.invert!(maximum_size)
   end
 
   # Makes sure that there are no non-overlapping borders between
