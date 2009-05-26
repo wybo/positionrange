@@ -37,13 +37,13 @@ class PositionRangeListTest < Test::Unit::TestCase
     }
   end
 
-  def test_new_around
+  def test_around
     assert_equal PositionRange::List.from_s('0,5'),
-        PositionRange::List.new_around('12345')
+        PositionRange::List.around('12345')
     assert_equal PositionRange::List.from_s('0,3'),
-        PositionRange::List.new_around([1,2,3])
+        PositionRange::List.around([1,2,3])
     assert_equal PositionRange::List.new,
-        PositionRange::List.new_around('')
+        PositionRange::List.around('')
   end
 
   ### Getters
@@ -184,11 +184,30 @@ class PositionRangeListTest < Test::Unit::TestCase
     old = PositionRange::List.from_s('5,15:16,25')
     new = old.dup << PositionRange.new(10,20, :attr => 5)
     assert_equal PositionRange::List.new, old - new
+
+    # dup-alternatives
+    p = PositionRange::List.from_s('1,15')
+    to_p = PositionRange::List.from_s('2,6:7,12')
+
+    assert_equal to_p, p.substract(
+        PositionRange::List.from_s('1,2:6,7:12,20'))
+    assert p != to_p
+
+    assert_equal to_p, p.substract!(
+        PositionRange::List.from_s('1,2:6,7:12,20'))
+    assert_equal p, to_p
   end
 
   def test_delete
-    assert_equal PositionRange::List.from_s('1,3:6,8'),
-        PositionRange::List.from_s('1,5:4,8').delete(PositionRange.new(3,6))
+    # dup-alternatives
+    p = PositionRange::List.from_s('1,5:4,8')
+    to_p = PositionRange::List.from_s('1,3:6,8')
+
+    assert_equal to_p, p.delete(PositionRange.new(3,6))
+    assert p != to_p
+    
+    assert_equal to_p, p.delete!(PositionRange.new(3,6))
+    assert_equal p, to_p
   end
 
   def test_invert
@@ -211,6 +230,16 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.new.invert!(55)
     assert_equal PositionRange::List.new,
         PositionRange::List.new.invert!(0)
+
+    # dup-alternatives
+    p = PositionRange::List.from_s('5,15')
+    to_p = PositionRange::List.from_s('0,5:15,' + PositionRange::MaximumSize.to_s)
+
+    assert_equal to_p, p.invert
+    assert p != to_p
+
+    assert_equal to_p, p.invert!
+    assert_equal p, to_p
   end
 
   def test_line_up_overlaps
@@ -272,6 +301,16 @@ class PositionRangeListTest < Test::Unit::TestCase
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.new.line_up_overlaps!
+
+    # dup-alternatives
+    p = PositionRange::List.from_s('2,6:0,8')
+    to_p = PositionRange::List.from_s('0,2:2,6:2,6:6,8')
+
+    assert_equal to_p, p.line_up_overlaps
+    assert p != to_p
+
+    assert_equal to_p, p.line_up_overlaps!
+    assert_equal p, to_p
   end
 
   def test_merge_adjacents
@@ -300,6 +339,16 @@ class PositionRangeListTest < Test::Unit::TestCase
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.new.merge_adjacents!
+
+    # dup-alternatives
+    p = PositionRange::List.from_s('2,4:4,8')
+    to_p = PositionRange::List.from_s('2,8')
+
+    assert_equal to_p, p.merge_adjacents
+    assert p != to_p
+
+    assert_equal to_p, p.merge_adjacents!
+    assert_equal p, to_p
   end
 
   def test_translate
@@ -314,6 +363,16 @@ class PositionRangeListTest < Test::Unit::TestCase
     # empty
     assert_equal PositionRange::List.new,
         PositionRange::List.new.translate!(5)
+
+    # dup-alternatives
+    p = PositionRange::List.from_s('10,13:16,18')
+    to_p = PositionRange::List.from_s('13,16:19,21')
+
+    assert_equal to_p, p.translate(3)
+    assert p != to_p
+
+    assert_equal to_p, p.translate!(3)
+    assert_equal p, to_p
   end
 
   def test_insert_at_ranges
@@ -353,6 +412,20 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('0,750:100,250').insert_at_ranges!(
             PositionRange::List.from_s('20,30:40,50'),
             PositionRange::List.from_s('800,810:850,860'))
+
+    # dup-alternatives
+    p = PositionRange::List.from_s('0,10:15,20')
+    to_p = PositionRange::List.from_s('0,10:50,59:15,20')
+
+    assert_equal to_p, p.insert_at_ranges(
+        PositionRange::List.from_s('50,59'),
+        PositionRange::List.from_s('11,20'))
+    assert p != to_p
+
+    assert_equal to_p, p.insert_at_ranges!(
+        PositionRange::List.from_s('50,59'),
+        PositionRange::List.from_s('11,20'))
+    assert_equal p, to_p
   end
 
   ### Highlevel methods
@@ -372,8 +445,13 @@ class PositionRangeListTest < Test::Unit::TestCase
     assert_equal PositionRange::List.from_s('2,7'),
         p.translate_to_view(PositionRange::List.from_s('1,5:10,13'))
     # last before the first
-    assert_equal PositionRange::List.from_s('3,9:16,18'),
+    assert_equal PositionRange::List.from_s('16,18:3,9'),
         p.translate_to_view(PositionRange::List.from_s('7,20:0,6'))
+
+    # interrupted
+    p = PositionRange::List.from_s('10,20:90,100:20,30')
+    assert_equal PositionRange::List.from_s('0,10:70,80:10,20'),
+        p.translate_to_view(PositionRange::List.from_s('10,50:60,100'))
 
     # empty
     assert_equal PositionRange::List.new,
@@ -400,6 +478,10 @@ class PositionRangeListTest < Test::Unit::TestCase
     p = PositionRange::List.from_s('5,6:1,2')
     assert_equal PositionRange::List.from_s('6,7:2,3'),
       p.translate_from_view(PositionRange::List.from_s('1,8'))
+    # interrupted
+    p = PositionRange::List.from_s('0,10:70,80:10,20')
+    assert_equal PositionRange::List.from_s('10,20:90,100:20,30'),
+        p.translate_from_view(PositionRange::List.from_s('10,50:60,100'))
 
     # empty
     assert_equal PositionRange::List.new,

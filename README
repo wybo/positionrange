@@ -1,4 +1,6 @@
-= Position Range -- Ranges with attributes that can be juggled
+= Position Range Gem documentation
+
+-- Ranges with attributes that can be juggled
 
 Allows you to assign random attributes to ranges and juggle them in
 lists. Also adds parsing from string, but most intereting when used in
@@ -65,31 +67,19 @@ Clustering overlaps maintains attributes.
   > l.cluster_overlaps == output
   => true
 
-== Download
-
-The latest version of Position Range can be found at:
-
-* http://rubyforge.org/frs/?group_id=7564
-
-Documentation can be found at:
-
-* http://positionrange.rubyforge.org
-
 == Installation
 
 You can install Position Range with the following command:
 
   % [sudo] gem install positionrange
 
-Or from its distribution directory with:
+The latest version of Diff LCS can also be downloaded at:
+
+* http://rubyforge.org/frs/?group_id=7564
+
+And then from its distribution directory installed with:
 
   % [sudo] ruby install.rb
-
-== License
-
-Position Range is released under the GNU Affero GPL licence.
-
-* http://www.fsf.org/licensing/licenses/agpl-3.0.html
 
 == Support
 
@@ -101,3 +91,22 @@ For the latest news on Position Range:
 
 Feel free to submit commits or feature requests. If you send a patch,
 remember to update the corresponding unit tests.
+
+== This Documentation
+
+This documentation can be browsed online at:
+
+* http://positionrange.rubyforge.org
+
+== Copyrights
+
+Position Range and these docs are Copyright (c) 2006-2009 The LogiLogi
+Foundation. Position Range is licensed under the {Affero General Public
+License}[http://www.fsf.org/licensing/licenses/agpl-3.0.html].
+These docs are available under the {Creative Commons Attribution-Share
+Alike License}[http://creativecommons.org/licenses/by-sa/3.0/].
+
+If you want to use Position Range in a publicly accessable application
+that is not Free Software (that means not Affero GPLed), then please
+{contact us}[mailto:foundation@logilogi.org] for single server
+licenses or special arrangements.

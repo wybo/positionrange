@@ -57,7 +57,7 @@ class PositionRange::List < Array
   # Returns a new PositionRangeList for the provided string, covering
   # it from start to end (the 'string' can also be an array).
   #
-  def self.new_around(string)
+  def self.around(string)
     if string.size > 0
       return PositionRange::List.new([PositionRange.new(0,string.size)])
     else
@@ -97,7 +97,7 @@ class PositionRange::List < Array
   # Attributes are ignored.
   #
   def within?(other)
-    if (self.dup.substract!(other, :ignore_attributes => true)).empty?
+    if (self.substract(other, :ignore_attributes => true)).empty?
       return true
     else
       return false
@@ -134,16 +134,16 @@ class PositionRange::List < Array
   # 1,5:7,8:10,12' becomes '2,5:11,12' after limiting to '2,6:11,40'
   #
   def &(other)
-    substraction_list = other.dup.invert!
-    return self.dup.substract!(substraction_list,:ignore_attributes => true)
+    substraction_list = other.invert
+    return self.substract(substraction_list, :ignore_attributes => true)
   end
 
   # Applies a substraction in the sense of Set theory.
   #
-  # See substract!
+  # See substract
   #
   def -(other)
-    self.dup.substract!(other)
+    self.substract(other)
   end
 
   # Applies a substraction in the sense of Set theory.
@@ -160,7 +160,7 @@ class PositionRange::List < Array
   # Options
   # <tt>:ignore_attributes</tt> => Ignores attributes
   #
-  def substract!(other,options = {})
+  def substract!(other, options = {})
     ignore_attributes = options[:ignore_attributes]
 
     sorted_self = self.sort
@@ -201,10 +201,26 @@ class PositionRange::List < Array
     return self
   end
 
+  # Substraction returning a new list.
+  #
+  # See substract!
+  #
+  def substract(other, options = {})
+    self.dup.substract!(other)
+  end
+
   # Deletes the position_range that is specified.
   #
-  def delete(p_r)
+  def delete!(p_r)
     self.substract!(PositionRange::List.new([p_r]))
+  end
+
+  # Deletion returning a new list.
+  #
+  # See delete!
+  #
+  def delete(p_r)
+    self.substract(PositionRange::List.new([p_r]))
   end
 
   # Results in all positions being included, being excluded now, and
@@ -244,6 +260,14 @@ class PositionRange::List < Array
       self.push(PositionRange.new(0, maximum_size))
     end
     return self
+  end
+
+  # Inversion returning a new list.
+  #
+  # See invert!
+  #
+  def invert(maximum_size = PositionRange::MaximumSize)
+    self.dup.invert!
   end
 
   # Makes sure that there are no non-overlapping borders between
@@ -297,6 +321,14 @@ class PositionRange::List < Array
     return self
   end
 
+  # Lining up overlaps returning a new list.
+  #
+  # See line_up_overlaps!
+  #
+  def line_up_overlaps
+    self.dup.line_up_overlaps!
+  end
+
   # Simplifies the PositionRange::List by merging adjacent PositionRanges.
   #
   # Example:
@@ -322,6 +354,14 @@ class PositionRange::List < Array
     return self
   end
 
+  # Merging adjacents returning a new list.
+  #
+  # See merge_adjacents!
+  # 
+  def merge_adjacents(options = {})
+    self.dup.merge_adjacents!(options)
+  end
+
   # Translates the PositionRange::List in space, along the given vector.
   #
   def translate!(integer)
@@ -332,6 +372,14 @@ class PositionRange::List < Array
       self[i] = self[i].new_dup(self[i].first + integer,self[i].last + integer)
     }
     return self
+  end
+
+  # Translation returning a new list.
+  #
+  # See translate!
+  #
+  def translate(integer)
+    self.dup.translate!(integer)
   end
 
   # The ranges_to_insert are inserted at the ranges_at_which_to_insert
@@ -385,6 +433,16 @@ class PositionRange::List < Array
     return self
   end
 
+  # Inserting at ranges returning a new list.
+  #
+  # See insert_at_ranges!
+  #
+  def insert_at_ranges(ranges_to_insert, ranges_at_which_to_insert,
+      ranges_to_skip = [])
+    return self.dup.insert_at_ranges!(ranges_to_insert, ranges_at_which_to_insert,
+        ranges_to_skip)
+  end
+
   ### Highlevel methods
 
   # Translates the PositionRange::List into the relative space defined
@@ -392,13 +450,16 @@ class PositionRange::List < Array
   #
   def translate_to_view(view_position_range_list)
     relative = PositionRange::List.new
-    view_p = 0
-    view_position_range_list.each {|snippet_p_r|
-      translate_list = self & PositionRange::List.new([snippet_p_r])
-      vector = view_p - snippet_p_r.first
-      relative.concat(translate_list.translate!(vector))
-      view_p += snippet_p_r.size
-    }
+    self.each do |p_r|
+      view_p = 0
+      p_r_list = PositionRange::List.new([p_r])
+      view_position_range_list.each do |snippet_p_r|
+        translate_list = p_r_list & PositionRange::List.new([snippet_p_r])
+        vector = view_p - snippet_p_r.first
+        relative.concat(translate_list.translate!(vector))
+        view_p += snippet_p_r.size
+      end
+    end
     relative.merge_adjacents!
     return relative
   end
@@ -407,14 +468,17 @@ class PositionRange::List < Array
   #
   def translate_from_view(view_position_range_list)
     absolute = PositionRange::List.new
-    view_p = 0
-    view_position_range_list.each {|snippet_p_r|
-      translate_list = self & PositionRange::List.new(
-          [PositionRange.new(view_p,view_p + snippet_p_r.size)])
-      vector = snippet_p_r.first - view_p
-      absolute.concat(translate_list.translate!(vector))
-      view_p += snippet_p_r.size
-    }
+    self.each do |p_r|
+      view_p = 0
+      p_r_list = PositionRange::List.new([p_r])
+      view_position_range_list.each do |snippet_p_r|
+        translate_list = p_r_list & PositionRange::List.new(
+            [PositionRange.new(view_p,view_p + snippet_p_r.size)])
+        vector = snippet_p_r.first - view_p
+        absolute.concat(translate_list.translate!(vector))
+        view_p += snippet_p_r.size
+      end
+    end
     absolute.merge_adjacents!
     return absolute
   end
@@ -454,7 +518,7 @@ class PositionRange::List < Array
   #
   def cluster_overlaps
     if !self.empty?
-      lined_up_self = self.dup.line_up_overlaps!
+      lined_up_self = self.line_up_overlaps
       clusters = [PositionRange::List.new().push(lined_up_self.shift)]
       lined_up_self.each {|p_r|
         if p_r == clusters.last[0]
