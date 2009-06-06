@@ -1,6 +1,5 @@
 = Position Range Gem documentation
-
--- Ranges with attributes that can be juggled
+  "Ranges with attributes that can be juggled"
 
 Allows you to assign random attributes to ranges and juggle them in
 lists. Also adds parsing from string, but most intereting when used in

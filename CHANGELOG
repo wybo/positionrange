@@ -1,3 +1,8 @@
+*0.6.7* (4 June 2009)
+
+* Fixed rdoc-generation bug in README
+
+
 *0.6.6* (26 May 2009)
 
 * Fixed bug in translate_to/from_view
@@ -12,7 +17,7 @@
 
 *0.6.2* (20 January 2009)
 
-* Updated link to docs in README.txt
+* Updated link to docs in README
 
 
 *0.6.1* (31 December 2008)
