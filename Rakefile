@@ -67,7 +67,7 @@ Rake::GemPackageTask.new(spec) do |p|
   p.need_zip = true
 end
 
-desc "Publish the docs, gem, and release files"
+desc "Build and publish the docs, gem, and release files"
 task :deploy => [:release, :pdoc] do 
   puts 'Published gem'
 end

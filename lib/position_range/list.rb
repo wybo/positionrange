@@ -270,7 +270,7 @@ class PositionRange::List < Array
     self.dup.invert!(maximum_size)
   end
 
-  # Makes sure that there are no non-overlapping borders between
+  # Makes sure that there are no overlapping borders between
   # PositionRanges.
   #
   # The guaranteed situation after calling this method:
@@ -401,6 +401,9 @@ class PositionRange::List < Array
           'of different range_sizes: ' + ranges_to_insert.to_s + ', ' +
           ranges_at_which_to_insert.to_s
     end
+    ranges_to_insert.align_chunks!(ranges_at_which_to_insert)
+    ranges_at_which_to_insert.align_chunks!(ranges_to_insert)
+
     ranges_to_act = ranges_at_which_to_insert.each {|p_r| p_r.action = :ins}.concat(
         ranges_to_skip).sort!
 
@@ -429,6 +432,37 @@ class PositionRange::List < Array
         end
       end
       self_p += p_r.size
+    }
+    return self
+  end
+
+  # Ensures that the other list and this list don't have any
+  # overlapping chunks, considering their size.
+  #
+  # So PositionRange::List.from_s('10,20:50,70').align_chunks!(
+  #     PositionRange::List.from_s('20,30:200,210,550,560'))
+  #
+  # will result in:
+  # PositionRange::List.from_s('10,20:50,60:60,70')
+  #
+  def align_chunks!(other_ranges)
+    i = -1
+    self_p = 0
+    other_p = 0
+    other_ranges.each {|p_r|
+      i += 1
+      if !self[i]
+        return self
+      end
+      other_p += p_r.size
+      self_p += self[i].size
+      if self_p > other_p
+        copy = self[i]
+        cut = self[i].begin + p_r.size
+        self[i] = copy.new_dup(copy.begin, cut)
+        self.insert(i + 1, copy.new_dup(cut, copy.end))
+        self_p = other_p
+      end
     }
     return self
   end

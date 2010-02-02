@@ -378,10 +378,10 @@ class PositionRangeListTest < Test::Unit::TestCase
 
   def test_insert_at_ranges
     # Without skipping
-    assert_equal PositionRange::List.from_s('0,10:50,59:15,20'),
+    assert_equal PositionRange::List.from_s('0,10:50,60:15,20'),
         PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
-            PositionRange::List.from_s('50,59'),
-            PositionRange::List.from_s('11,20'))
+            PositionRange::List.from_s('50,60'),
+            PositionRange::List.from_s('10,20'))
 
     # With skipping
     assert_equal PositionRange::List.from_s('39,49:100,102:6,7:16,20'),
@@ -414,6 +414,12 @@ class PositionRangeListTest < Test::Unit::TestCase
             PositionRange::List.from_s('20,30:40,50'),
             PositionRange::List.from_s('800,810:850,860'))
 
+    # error-case
+    assert_equal PositionRange::List.from_s('0,10:50,59:15,20:59,68'),
+        PositionRange::List.from_s('0,10:15,20').insert_at_ranges!(
+            PositionRange::List.from_s('50,68'),
+            PositionRange::List.from_s('11,20:25,34'))
+
     # dup-alternatives
     p = PositionRange::List.from_s('0,10:15,20')
     to_p = PositionRange::List.from_s('0,10:50,59:15,20')
@@ -427,6 +433,23 @@ class PositionRangeListTest < Test::Unit::TestCase
         PositionRange::List.from_s('50,59'),
         PositionRange::List.from_s('11,20'))
     assert_equal p, to_p
+  end
+
+  def test_align_chunks
+    # standard case
+    assert_equal PositionRange::List.from_s('10,20:50,60:60,70'),
+        PositionRange::List.from_s('10,20:50,70').align_chunks!(
+            PositionRange::List.from_s('20,30:200,210:550,560'))
+
+    # self longer
+    assert_equal PositionRange::List.from_s('10,20:50,60:60,70:70,80'),
+        PositionRange::List.from_s('10,20:50,80').align_chunks!(
+            PositionRange::List.from_s('20,30:200,210:550,560'))
+
+    # other longer
+    assert_equal PositionRange::List.from_s('10,20:50,60:60,70'),
+        PositionRange::List.from_s('10,20:50,70').align_chunks!(
+            PositionRange::List.from_s('20,30:200,210:550,590'))
   end
 
   ### Highlevel methods

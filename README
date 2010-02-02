@@ -68,7 +68,7 @@ Clustering overlaps maintains attributes.
 
 == Installation
 
-You can install Position Range with the following command:
+You can install PositionRange with the following command:
 
   % [sudo] gem install positionrange
 
@@ -82,9 +82,9 @@ And then from its distribution directory installed with:
 
 == Support
 
-The Position Range homepage is http://positionrange.rubyforge.org.
+The PositionRange homepage is http://positionrange.rubyforge.org.
 
-For the latest news on Position Range:
+For the latest news on PositionRange:
 
 * http://foundation.logilogi.org/tags/PositionRange
 
@@ -99,11 +99,11 @@ This documentation can be browsed online at:
 
 == Copyrights
 
-Position Range and these docs are Copyright (c) 2006-2009 The LogiLogi
-Foundation. Position Range is licensed under the {GNU Lesser General 
+PositionRange and these docs are Copyright (c) 2006-2009 The LogiLogi
+Foundation. PositionRange is licensed under the {GNU Lesser General 
 Public License}[http://www.gnu.org/licenses/lgpl-3.0-standalone.html].
 These docs are available under the {Creative Commons Attribution-Share
 Alike License}[http://creativecommons.org/licenses/by-sa/3.0/].
 
-You can use Position Range in an application that is not Free Software
-but Position Range itself remains Free Software.
+You can use PositionRange in an application that is not Free Software
+but PositionRange itself remains Free Software.
