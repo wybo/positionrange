@@ -1,13 +1,7 @@
 #--#
-# Copyright: (c) 2006-2009 The LogiLogi Foundation <foundation@logilogi.org>
+# Copyright: (c) 2006-2012 Wybo Wiersma <mail@wybowiersma.net>
 #
-# License:
-#   This file is part of the PositionRange Library. PositionRange is Free 
-#   Software. You can run/distribute/modify PositionRange under the terms 
-#   of the GNU Lesser General Public License version 3. This license
-#   states that you can use PositionRange in applications that are not Free 
-#   Software but PositionRange itself remains Free Software. (LICENSE contains 
-#   the full text of the legally binding license).
+# MIT Licensed
 #++#
 #
 # PositionRanges allow one to model ranges of text.
@@ -25,20 +19,9 @@
 #
 # first...last, not first..last
 
-$:.unshift(File.dirname(__FILE__)) unless
-    $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
+require 'position_range/version'
 
-class PositionRange < Range
-  include Comparable
-
-  @@attributes = []
-
-  def attributes
-    return @@attributes
-  end
-
-  ### Constants
-
+class PositionRange # < Range (set in version)
   # Mainly used by PositionRange::List
   MaximumSize = 2 ** 31
 
@@ -55,6 +38,14 @@ require 'position_range/error'
 require 'position_range/list'
 
 class PositionRange
+  include Comparable
+
+  @@attributes = []
+
+  def attributes
+    return @@attributes
+  end
+
   ### Constructors
 
   # Initializes a new PositionRange.

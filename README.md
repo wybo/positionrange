@@ -1,19 +1,19 @@
-= Position Range Gem documentation
+# Position Range
   "Ranges with attributes that can be juggled"
 
-Allows you to assign random attributes to ranges and juggle them in
-lists. Also adds parsing from string, but most intereting when used in
+Allows one to assign random attributes to ranges and juggle them in
+lists. Also adds parsing from string, but most interesting when used in
 a PositionRange::List.
 
-There standard set operations can be applied to it, like additions,
-substractions and intersections. In addition you can also get the
+In lists standard set operations can be applied to them, like
+addition, substraction and intersection. In addition one can also get the
 combined size of all the ranges in the list. And cluster overlapping
 ranges, maintaining the attributes (more below).
 
 PositionRange is a library by the LogiLogi Foundation, extracted from
 http://www.logilogi.org (http://foundation.logilogi.org).
 
-== Usage
+## Usage
 
 First require it.
 
@@ -66,44 +66,32 @@ Clustering overlaps maintains attributes.
   > l.cluster_overlaps == output
   => true
 
-== Installation
+## Installation
 
-You can install PositionRange with the following command:
+Add this line to your application's Gemfile:
 
-  % [sudo] gem install positionrange
+    gem 'positionrange'
 
-The latest version of Diff LCS can also be downloaded at:
+And then execute:
 
-* http://rubyforge.org/frs/?group_id=7564
+    $ bundle
 
-And then from its distribution directory installed with:
+Or install it yourself as:
 
-  % [sudo] ruby install.rb
+    $ gem install positionrange
 
-== Support
-
-The PositionRange homepage is http://positionrange.rubyforge.org.
-
-For the latest news on PositionRange:
+Feel free to report issues and to ask questions. For the latest news on
+PositionRange:
 
 * http://foundation.logilogi.org/tags/PositionRange
 
-Feel free to submit commits or feature requests. If you send a patch,
-remember to update the corresponding unit tests.
+## Contributing
 
-== This Documentation
+If you wish to contribute, please create a pull-request and remember to update
+the corresponding unit test(s).
 
-This documentation can be browsed online at:
-
-* http://positionrange.rubyforge.org
-
-== Copyrights
-
-PositionRange and these docs are Copyright (c) 2006-2009 The LogiLogi
-Foundation. PositionRange is licensed under the {GNU Lesser General 
-Public License}[http://www.gnu.org/licenses/lgpl-3.0-standalone.html].
-These docs are available under the {Creative Commons Attribution-Share
-Alike License}[http://creativecommons.org/licenses/by-sa/3.0/].
-
-You can use PositionRange in an application that is not Free Software
-but PositionRange itself remains Free Software.
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Added some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request

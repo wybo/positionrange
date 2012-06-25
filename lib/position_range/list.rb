@@ -1,24 +1,4 @@
-#--#
-# Copyright: (c) 2006-2008 The LogiLogi Foundation <foundation@logilogi.org>
-#
-# License:
-#   This file is part of the PositionRange Library. PositionRange is Free
-#   Software. You can run/distribute/modify PositionRange under the terms of
-#   the GNU Affero General Public License version 3. The Affero GPL states
-#   that running a modified version or a derivative work also requires you to
-#   make the sourcecode of that work available to everyone that can interact
-#   with it. We chose the Affero GPL to ensure that PositionRange remains open
-#   and libre (LICENSE.txt contains the full text of the legally binding
-#   license).
-#++#
-#
-# Keeps a list of PositionRanges.
-#
-# Supports basic set operations, as well as many others, like
-# clustering overlaps and getting sizes.
-
 class PositionRange::List < Array
-
   ###### Regular expressions
 
   # Check-regexps
@@ -163,9 +143,9 @@ class PositionRange::List < Array
   def substract!(other, options = {})
     ignore_attributes = options[:ignore_attributes]
 
-    sorted_self = self.sort
+    sorted_self = self.dup.sort!
     if sorted_self.size > 0 and other.size > 0
-      other = other.sort.merge_adjacents!
+      other = other.dup.sort!.merge_adjacents!
 
       last_i = 0
       other.each do |p_r|
@@ -593,7 +573,7 @@ class PositionRange::List < Array
   # Parses a PositionRange::List to a string
   #
   def to_s
-    self.sort
+    self.sort!
     p_r_l_string = ''
     self.each {|p_r|
       p_r_l_string += p_r.to_s + ':'

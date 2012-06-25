@@ -1,16 +1,5 @@
-#--#
-# Copyright: (c) 2006-2009 The LogiLogi Foundation <foundation@logilogi.org>
-#
-# License:
-#   This file is part of the PositionRange Library. PositionRange is Free 
-#   Software. You can run/distribute/modify PositionRange under the terms 
-#   of the GNU Lesser General Public License version 3. This license
-#   states that you can use PositionRange in applications that are not Free 
-#   Software but PositionRange itself remains Free Software. (LICENSE contains 
-#   the full text of the legally binding license).
-#++#
-
-require File.dirname(__FILE__) + '/test_helper.rb'
+['rubygems', 'require_relative'].each {|g| require g} if RUBY_VERSION =~ /1\.8/
+require_relative 'helper'
 
 class PositionRangeTest < Test::Unit::TestCase
   ### Initialization

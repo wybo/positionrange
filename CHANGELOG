@@ -1,13 +1,22 @@
-*0.6.7* (4 June 2009)
+*0.7.1* (24 June 2012)
+
+* Fixed bug with sort returning an Array rather than the original List in
+  Ruby 1.9.3
+* Updated docs
+* Moved to Github
+* Re-released using bundler
+* Re-licensed under MIT license
+
+
+*0.6.6* (4 June 2009)
 
 * Fixed rdoc-generation bug in README
 
 
-*0.6.6* (26 May 2009)
+*0.6.5* (26 May 2009)
 
-* Fixed bug in translate_to/from_view
-* Added non-'!' alternatives to methods
-* Changed license to LGPL v3
+* Updated README
+* Re-licensed to LGPL v3
 
 
 *0.6.3* (4 February 2009)
